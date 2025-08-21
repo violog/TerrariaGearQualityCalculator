@@ -1,0 +1,3 @@
+displayName = Gear Quality Calculator
+author = violog, lolik228
+version = 0.1

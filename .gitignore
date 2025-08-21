@@ -1,0 +1,11 @@
+.vs/
+.idea/
+.vscode/
+bin/
+obj/
+
+*.swp
+*.bak
+*.DS_STORE
+*.log
+*.tmp
