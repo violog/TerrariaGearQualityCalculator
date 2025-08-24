@@ -7,6 +7,7 @@ public interface IBackend
 {
     // Load fills Bosses list and be called only once, preferably in constructor
     internal List<ICalculation> Load();
-    // Save stores new or updates an existing boss entry
+
+    // Store stores the entire updated list
     internal void Store(List<ICalculation> calculations);
 }
