@@ -29,6 +29,7 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator
                 CalculatorUi = new CalculatorUI();
 
                 CalculatorUi.Activate();
+                CalculatorUi.AddSearchBar(CalculatorUi.Form);
             }
         }
 
