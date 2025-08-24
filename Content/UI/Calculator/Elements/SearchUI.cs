@@ -5,7 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using Terraria;
+using Terraria.Audio;
 using Terraria.GameContent.UI.Elements;
 using Terraria.GameInput;
 using Terraria.Localization;
@@ -13,91 +15,93 @@ using Terraria.UI;
 
 namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements
 {
-    public class SearchUI : UIElement
+    public class SearchUI : UIPanel
     {
-        private UISearchBar _search;
-        private bool hasFocus { get; set; }
-
-        private string _text = "Search...";
-
-        public string Text { get; private set; }
+        private UISearchBar _searchBar;
+        private UIImageButton uIImageButton2;
+        
+        // TODO: this should do an actual search and perform filtering
+        private void OnSearchContentsChanged(string contents)
+        {
+        }
+        
+        private void Click_SearchArea(UIMouseEvent evt, UIElement listeningElement)
+        {
+            if (evt.Target.Parent != this)
+            {
+                // this was the method you were looking for :)
+                _searchBar.ToggleTakingText();
+            }
+        }
 
         public override void OnInitialize()
         {
             Width.Set(0, 1f);
             Height.Set(40f, 0f);
-
-            _search = new UISearchBar(Language.GetText("UI.PlayerNameSlot"), 1f)
+            
+            _searchBar = new UISearchBar(Language.GetText("UI.PlayerNameSlot"), 0.8f)
             {
-                Width = StyleDimension.Fill,
-                Height = StyleDimension.Fill,
-                HAlign = 0f
+                Width = new StyleDimension(0f, 0.5f),
+                Height = new StyleDimension(0f, 0.5f),
+                HAlign = 0f,
+                VAlign = 0.5f,
+                Left = new StyleDimension(0f, 0f),
+                IgnoresMouseInteraction = true
             };
-
-            _search.OnLeftClick += (evt, element) =>
+            OnLeftClick += Click_SearchArea;
+            Append(_searchBar);
+            
+            _searchBar.OnContentsChanged += OnSearchContentsChanged;
+            _searchBar.OnStartTakingInput += OnStartTakingInput;
+            _searchBar.OnEndTakingInput += OnEndTakingInput;
+            _searchBar.OnCanceledTakingInput += OnCanceledInput;
+            
+            uIImageButton2 = new UIImageButton(Main.Assets.Request<Texture2D>("Images/UI/SearchCancel", (AssetRequestMode)1))
             {
-                Main.blockInput = true;
-                hasFocus = true;
-                // Main.clrInput();
-                // PlayerInput.WritingText = true;
-                // Main.instance.HandleIME();
-                // string prev = Text;
-                // string newString = Main.GetInputText(prev);
-                // Main.NewText(newString);
-                // Text = newString;
-                // _search.SetText(newString);
+                HAlign = 1f,
+                VAlign = 0.5f,
+                Left = new StyleDimension(-2f, 0f)
             };
-
-            _search.OnRightClick += (evt, element) =>
-            {
-                Main.clrInput();
-                PlayerInput.WritingText = false;
-                Main.blockInput = false;
-            };
-
-            Append(_search);
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-            // base.Update(gameTime); // Propagate update to child elements.
-            if (hasFocus) HandleTextInput();
-
-            // if (hasFocus)
-            // {
-            //     _search.SetText(Main.GetInputText(_search.Text));
-            // }
-            //
-            // if (_search.Text != _text)
-            // {
-            //     _text = _search.Text;
-            //
-            //     Recalculate();
-            // }
-            base.Update(gameTime);
+            uIImageButton2.OnMouseOver += searchCancelButton_OnMouseOver;
+            uIImageButton2.OnLeftClick += searchCancelButton_OnClick;
+            Append(uIImageButton2);
+            
+            _searchBar.SetContents(null, forced: true);
         }
         
-        private void HandleTextInput()
+        // TODO: Play Terraria sounds on hover and click, method signature is somewhy changed
+        private void searchCancelButton_OnClick(UIMouseEvent evt, UIElement listeningElement)
         {
-            PlayerInput.WritingText = true;
-            Main.instance.HandleIME();
-            string prev = Text;
-            string newString = Main.GetInputText(prev);
-            // if (newString != prev)
-            // {
-                int newStringLength = newString.Length;
-                // if (prev != Text)
-                    // newString += Text[cursorPosition..];
-                Text = newString;
-                Main.NewText(newString);
-                // _search.SetText(newString);
-                // _search.SetText(newString);
-            // }
+            if (_searchBar.HasContents)
+            {
+                _searchBar.SetContents(null, forced: true);
+                // SoundEngine.PlaySound(11);
+            }
+            else
+            {
+                // SoundEngine.PlaySound(12);
+            }
+        }
+        
+        private void searchCancelButton_OnMouseOver(UIMouseEvent evt, UIElement listeningElement)
+        {
+            // SoundEngine.PlaySound(12);
+        }
+        
+        private void OnStartTakingInput()
+        {
+            BorderColor = Main.OurFavoriteColor;
         }
 
-        protected override void DrawSelf(SpriteBatch spriteBatch)
+        private void OnEndTakingInput()
         {
-            base.DrawSelf(spriteBatch);
+            BorderColor = new Color(35, 40, 83);
+        }
+        
+        // I assume this is called when you press hotkey to toggle UI, because my inventory was toggling at the same time
+        private void OnCanceledInput()
+        {
+            // Main.LocalPlayer.ToggleInv();
         }
     }
 }
