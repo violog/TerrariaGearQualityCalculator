@@ -8,14 +8,6 @@
 		
 	</PropertyGroup>
 	<ItemGroup>
-	  <AdditionalFiles Remove="Content\UI\Menu\**" />
-	  <AdditionalFiles Remove="Content\UI\Новая папка\**" />
-	  <Compile Remove="Content\UI\Menu\**" />
-	  <Compile Remove="Content\UI\Новая папка\**" />
-	  <EmbeddedResource Remove="Content\UI\Menu\**" />
-	  <EmbeddedResource Remove="Content\UI\Новая папка\**" />
-	  <None Remove="Content\UI\Menu\**" />
-	  <None Remove="Content\UI\Новая папка\**" />
 	</ItemGroup>
 
 	<!-- References -->
