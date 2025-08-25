@@ -14,43 +14,40 @@ using Terraria.UI;
 
 namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements
 {
-    public class SearchUI : UIElement
+    internal class SearchUI : UIElement
     {
-        private UITextBox _search;
+        private UITextBox _searchUi;
 
         private bool _isFocused = false;
 
-        private readonly string _defaultText = "Search...";
+        private string _placeholder = "Search...";
 
-        public string Text => _search.Text;
+        public string Text => _searchUi.Text;
 
-        public string DefaultText => _defaultText;
+        public string Placeholder => _placeholder;
 
         public override void OnInitialize()
         {
-            Width.Set(0, 1f);
-            Height.Set(40f, 0f);
-
-            _search = new UITextBox(_defaultText, 1f, false)
+            _searchUi = new UITextBox(_placeholder, 1f, false)
             {
                 Width = StyleDimension.Fill,
                 Height = StyleDimension.Fill,
                 TextHAlign = 0f
             };
 
-            _search.SetTextMaxLength(50);
+            _searchUi.SetTextMaxLength(50);
 
-            _search.OnLeftClick += (evt, element) =>
+            _searchUi.OnLeftClick += (evt, element) =>
             {
-                if (_search.Text == _defaultText)
+                if (_searchUi.Text == _placeholder)
                 {
-                    _search.SetText("");
+                    _searchUi.SetText("");
                 }
 
                 Focus();
             };
 
-            Append(_search);
+            Append(_searchUi);
         }
 
         public void Focus()
@@ -83,9 +80,9 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements
 
             if (!ContainsPoint(MousePosition) && (Main.mouseLeft || Main.mouseRight))
             {
-                if (string.IsNullOrEmpty(_search.Text))
+                if (string.IsNullOrEmpty(_searchUi.Text))
                 {
-                    _search.SetText(_defaultText);
+                    _searchUi.SetText(_placeholder);
                 }
 
                 Unfocus();
@@ -103,11 +100,11 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements
                 PlayerInput.WritingText = true;
                 Main.instance.HandleIME();
 
-                string newText = Main.GetInputText(_search.Text);
+                string newText = Main.GetInputText(_searchUi.Text);
 
-                if (!newText.Equals(_search.Text))
+                if (!newText.Equals(_searchUi.Text))
                 {
-                    _search.SetText(newText);
+                    _searchUi.SetText(newText);
                 }
 
                 if (JustPressed(Keys.Enter) || JustPressed(Keys.Escape))

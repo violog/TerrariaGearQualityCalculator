@@ -14,7 +14,7 @@ namespace TerrariaGearQualityCalculator
 
         public override void Load()
         {
-            CalculatorHotKey = KeybindLoader.RegisterKeybind(this, "Gear Quality Calculator", "P");
+            CalculatorHotKey = KeybindLoader.RegisterKeybind(this, "GearQualityCalculator", "P");
         }
 
         public override void Unload()

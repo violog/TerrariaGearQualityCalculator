@@ -17,7 +17,7 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator
 {
     public class CalculatorUI : UIState
     {
-        private UIPanel _form;
+        private UIPanel _formUi;
 
         private int _formPadding = 10;
 
@@ -25,7 +25,9 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator
 
         private int _formHeight = 300;
 
-        private SearchUI search;
+        private SearchUI _searchUi;
+
+        private BossListUI _bossListUi;
 
         public override void OnInitialize()
         {
@@ -36,40 +38,43 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator
 
         public void CreateForm()
         {
-            _form = new UIPanel();
+            _formUi = new UIPanel();
 
-            _form.Width.Set(_formWidth, 0);
-            _form.Height.Set(_formHeight, 0);
-            _form.SetPadding(_formPadding);
-            _form.VAlign = 0.5f;
-            _form.HAlign = 0.5f;
+            _formUi.Width.Set(_formWidth, 0);
+            _formUi.Height.Set(_formHeight, 0);
+            _formUi.SetPadding(_formPadding);
+            _formUi.VAlign = 0.5f;
+            _formUi.HAlign = 0.5f;
 
-            Append(_form);
+            Append(_formUi);
         }
 
         public void LoadElements()
         {
             LoadSearch();
 
-            LoadBody();
+            LoadBossList();
         }
 
         public void LoadSearch()
         {
-            search = new SearchUI();
+            _searchUi = new SearchUI();
 
-            _form.Append(search);
+            _searchUi.Width.Set(0, 1f);
+            _searchUi.Height.Set(40f, 0f);
+
+            _formUi.Append(_searchUi);
         }
 
-        public void LoadBody()
+        public void LoadBossList()
         {
-            UIPanel body = new UIPanel();
+            _bossListUi = new BossListUI();
 
-            body.Top.Set(50, 0);
-            body.Width = StyleDimension.Fill;
-            body.Height = StyleDimension.FromPixels(_formHeight - 50 - 2* _formPadding);
+            _bossListUi.Top.Set(50, 0);
+            _bossListUi.Width = StyleDimension.Fill;
+            _bossListUi.Height = StyleDimension.FromPixels(_formHeight - 50 - 2*_formPadding);
 
-            _form.Append(body);
+            _formUi.Append(_bossListUi);
         }
 
         public override void Update(GameTime gameTime)
@@ -82,7 +87,7 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator
             base.DrawSelf(spriteBatch);
 
             // Preventing mouse clicks from using selected item
-            if (_form.ContainsPoint(Main.MouseScreen))
+            if (_formUi.ContainsPoint(Main.MouseScreen))
             {
                 Main.LocalPlayer.mouseInterface = true;
             }

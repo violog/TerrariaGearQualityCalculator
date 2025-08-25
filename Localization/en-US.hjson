@@ -1,0 +1,6 @@
+Mods: {
+	TerrariaGearQualityCalculator: {
+		Keybinds.GearQualityCalculator.DisplayName: Gear Quality Calculator
+		UI.SearchUI.Placeholder: Search...
+	}
+}
