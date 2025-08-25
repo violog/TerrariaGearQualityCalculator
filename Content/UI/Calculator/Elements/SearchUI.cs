@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.GameInput;
@@ -15,90 +16,107 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements
 {
     public class SearchUI : UIElement
     {
-        private UISearchBar _search;
-        private bool hasFocus { get; set; }
+        private UITextBox _search;
 
-        private string _text = "Search...";
+        private bool _isFocused = false;
 
-        public string Text { get; private set; }
+        private readonly string _defaultText = "Search...";
+
+        public string Text => _search.Text;
+
+        public string DefaultText => _defaultText;
 
         public override void OnInitialize()
         {
             Width.Set(0, 1f);
             Height.Set(40f, 0f);
 
-            _search = new UISearchBar(Language.GetText("UI.PlayerNameSlot"), 1f)
+            _search = new UITextBox(_defaultText, 1f, false)
             {
                 Width = StyleDimension.Fill,
                 Height = StyleDimension.Fill,
-                HAlign = 0f
+                TextHAlign = 0f
             };
+
+            _search.SetTextMaxLength(50);
 
             _search.OnLeftClick += (evt, element) =>
             {
-                Main.blockInput = true;
-                hasFocus = true;
-                // Main.clrInput();
-                // PlayerInput.WritingText = true;
-                // Main.instance.HandleIME();
-                // string prev = Text;
-                // string newString = Main.GetInputText(prev);
-                // Main.NewText(newString);
-                // Text = newString;
-                // _search.SetText(newString);
-            };
+                if (_search.Text == _defaultText)
+                {
+                    _search.SetText("");
+                }
 
-            _search.OnRightClick += (evt, element) =>
-            {
-                Main.clrInput();
-                PlayerInput.WritingText = false;
-                Main.blockInput = false;
+                Focus();
             };
 
             Append(_search);
         }
 
+        public void Focus()
+        {
+            if (!_isFocused)
+            {
+                Main.clrInput();
+                _isFocused = true;
+                Main.blockInput = true;
+            }
+        }
+
+        public void Unfocus()
+        {
+            if (_isFocused)
+            {
+                _isFocused = false;
+                Main.blockInput = false;
+            }
+        }
+
+        private static bool JustPressed(Keys key)
+        {
+            return Main.inputText.IsKeyDown(key) && !Main.oldInputText.IsKeyDown(key);
+        }
+
         public override void Update(GameTime gameTime)
         {
-            // base.Update(gameTime); // Propagate update to child elements.
-            if (hasFocus) HandleTextInput();
+            Vector2 MousePosition = new Vector2((float)Main.mouseX, (float)Main.mouseY);
 
-            // if (hasFocus)
-            // {
-            //     _search.SetText(Main.GetInputText(_search.Text));
-            // }
-            //
-            // if (_search.Text != _text)
-            // {
-            //     _text = _search.Text;
-            //
-            //     Recalculate();
-            // }
+            if (!ContainsPoint(MousePosition) && (Main.mouseLeft || Main.mouseRight))
+            {
+                if (string.IsNullOrEmpty(_search.Text))
+                {
+                    _search.SetText(_defaultText);
+                }
+
+                Unfocus();
+            }
+
             base.Update(gameTime);
-        }
-        
-        private void HandleTextInput()
-        {
-            PlayerInput.WritingText = true;
-            Main.instance.HandleIME();
-            string prev = Text;
-            string newString = Main.GetInputText(prev);
-            // if (newString != prev)
-            // {
-                int newStringLength = newString.Length;
-                // if (prev != Text)
-                    // newString += Text[cursorPosition..];
-                Text = newString;
-                Main.NewText(newString);
-                // _search.SetText(newString);
-                // _search.SetText(newString);
-            // }
         }
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
             base.DrawSelf(spriteBatch);
+
+            if (_isFocused)
+            {
+                PlayerInput.WritingText = true;
+                Main.instance.HandleIME();
+
+                string newText = Main.GetInputText(_search.Text);
+
+                if (!newText.Equals(_search.Text))
+                {
+                    _search.SetText(newText);
+                }
+
+                if (JustPressed(Keys.Enter) || JustPressed(Keys.Escape))
+                {
+                    Main.drawingPlayerChat = false;
+
+                    Unfocus();
+                }
+            }
         }
     }
 }
-    
