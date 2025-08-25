@@ -10,8 +10,8 @@ public interface ICalculation
 
     // Sr is Survivability Ratio that effectively shows gear quality for the specific boss fight
     public decimal Sr => PlayerTime / BossTime;
-    // MarshalJson is used to store calculations somewhere in persistent storage
-    // TODO: I wonder if the interface or the class itself will be serialized, as I need the class
-    // public byte[] MarshalJson();
-    // public byte[] UnmarshalJson();
+
+    // CacheValid shows whether the cache can be reused, it should be updated accordingly
+    // It is convenient to store on lowest calculation level and propagate as values change
+    public bool CacheValid { get; set; }
 }
