@@ -8,7 +8,7 @@ using TerrariaGearQualityCalculator.Calculators;
 namespace TerrariaGearQualityCalculator.Storage;
 
 // ModelStorage is a wrapper around MemoryStorage to store models
-public class ModelStorage : MemoryStorage
+public class ModelStorage : MemoryStorage, IModelStorage
 {
     public IReadOnlyList<ICalculationModel> BossList => Models;
     private List<ICalculationModelWritable> Models { get; }
