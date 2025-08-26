@@ -11,7 +11,8 @@ public interface ICalculation
     // Sr is Survivability Ratio that effectively shows gear quality for the specific boss fight
     public decimal Sr => PlayerTime / BossTime;
 
-    // CacheValid shows whether the cache can be reused, it should be updated accordingly
-    // It is convenient to store on lowest calculation level and propagate as values change
-    public bool CacheValid { get; set; }
+    // ToModel generates a writable model of the calculation.
+    // It is recommended to call this method once and cache the model,
+    // updating only calculation values.
+    public ICalculationModelWritable ToModel();
 }

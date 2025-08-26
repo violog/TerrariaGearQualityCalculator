@@ -1,9 +1,9 @@
 using Terraria.Localization;
-using TerrariaGearQualityCalculator.Calculators;
 
-namespace TerrariaGearQualityCalculator.Content.UI.Models;
+namespace TerrariaGearQualityCalculator.Calculators;
 
-// ICalculationModel is a wrapper around ICalculation with localized and grouped text for display
+// ICalculationModel is a wrapper around ICalculation with localized and grouped text for display.
+// This interface is intended for front-end read-only usage.
 public interface ICalculationModel
 {
     // Name is localized boss name
@@ -13,7 +13,7 @@ public interface ICalculationModel
     public decimal Sr { get; }
 
     // DetailsAttributes are the public properties of every calculation, like SR, DPS, boss and player time etc.
-    public static abstract LocalizedText[] DetailsAttributes { get; }
+    public LocalizedText[] DetailsAttributes { get; }
 
     // DetailsValues are the values matching DetailsAttributes
     public string[] DetailsValues { get; }

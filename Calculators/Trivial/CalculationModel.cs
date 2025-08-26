@@ -3,50 +3,53 @@ using System.Globalization;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.Social.Steam;
-using TerrariaGearQualityCalculator.Content.UI.Models;
 
 namespace TerrariaGearQualityCalculator.Calculators.Trivial;
 
-internal class CalculationModel : ICalculationModel
+internal class CalculationModel : ICalculationModelWritable
 {
+    public int Id => Calc.Id;
     public string Name { get; }
     public decimal Sr => (Calc as ICalculation).Sr;
-    public static LocalizedText[] DetailsAttributes { get; }
+
+    public LocalizedText[] DetailsAttributes => StaticDetailsAttributes;
+
     public string[] DetailsValues { get; private set; }
 
-    private TrivialCalculation Calc { get; }
+    private static LocalizedText[] StaticDetailsAttributes { get; }
+
+    private TrivialCalculation Calc { get; set; }
     // this will be reused for gear
     // public LocalizedText[] GearDetails { get; set; }
 
     static CalculationModel()
     {
         // preserve this order in values
-        DetailsAttributes =
+        StaticDetailsAttributes =
         [
-            Language.GetText("Mods.TerrariaGearQualityCalculator.Calculators.Trivial.Sr"),
-            Language.GetText("Mods.TerrariaGearQualityCalculator.Calculators.Trivial.PlayerTime"),
-            Language.GetText("Mods.TerrariaGearQualityCalculator.Calculators.Trivial.BossTime"),
-            Language.GetText("Mods.TerrariaGearQualityCalculator.Calculators.Trivial.PlayerDps"),
-            Language.GetText("Mods.TerrariaGearQualityCalculator.Calculators.Trivial.BossRemainingHp"),
+            Language.GetText("Mods.TerrariaGearQualityCalculator.CalculationModels.Trivial.Sr"),
+            Language.GetText("Mods.TerrariaGearQualityCalculator.CalculationModels.Trivial.PlayerTime"),
+            Language.GetText("Mods.TerrariaGearQualityCalculator.CalculationModels.Trivial.BossTime"),
+            Language.GetText("Mods.TerrariaGearQualityCalculator.CalculationModels.Trivial.PlayerDps"),
+            Language.GetText("Mods.TerrariaGearQualityCalculator.CalculationModels.Trivial.BossRemainingHp"),
         ];
     }
 
     public CalculationModel(TrivialCalculation calculation)
     {
-        Calc = calculation;
-        var npc = ContentSamples.NpcsByNetId[Calc.Id];
+        var npc = ContentSamples.NpcsByNetId[calculation.Id];
         if (npc == null)
         {
             throw new NullReferenceException($"NPC not found for id {Calc.Id}");
         }
 
         Name = npc.FullName;
-        UpdateDetailsValues();
+        Update(calculation);
     }
 
-    private void UpdateDetailsValues()
+    public void Update(ICalculation calculation)
     {
-        if (Calc.CacheValid) return;
+        Calc = (TrivialCalculation)calculation;
 
         DetailsValues =
         [
@@ -56,7 +59,5 @@ internal class CalculationModel : ICalculationModel
             Calc.PlayerDps.ToString(),
             Calc.BossRemainingHp.ToString(),
         ];
-
-        Calc.CacheValid = true;
     }
 }

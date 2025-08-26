@@ -4,8 +4,12 @@ internal class TrivialCalculation(int id, decimal playerDps, decimal playerTime,
 {
     public int Id { get; } = id;
     public decimal PlayerDps { get; } = playerDps;
-    public decimal BossRemainingHp = bossRemainingHp;
+    public decimal BossRemainingHp { get; } = bossRemainingHp;
     public decimal BossTime { get; } = bossRemainingHp / playerTime;
     public decimal PlayerTime { get; } = playerTime;
-    public bool CacheValid { get; set; }
+
+    public ICalculationModelWritable ToModel()
+    {
+        return new CalculationModel(this);
+    }
 }
