@@ -2,13 +2,14 @@ Mods: {
 	TerrariaGearQualityCalculator: {
 		CalculationModels: {
 			Trivial: {
-			    Sr: Survivability Ratio
+				Sr: Survivability Ratio
 				PlayerTime: Player liveness time
 				BossTime: Boss liveness time
-			    PlayerDps: Average player DPS
+				PlayerDps: Average player DPS
 				BossRemainingHp: Boss remaining HP
 			}
 		}
+
 		Keybinds.GearQualityCalculator.DisplayName: Gear Quality Calculator
 		UI.SearchUI.Placeholder: Search...
 	}

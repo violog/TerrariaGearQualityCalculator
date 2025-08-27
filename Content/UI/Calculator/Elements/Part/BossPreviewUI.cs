@@ -10,11 +10,11 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements.Part
 {
     internal class BossPreviewUI : UIPanel
     {
-        private float _height;
+        private readonly float _height;
 
-        private string _bossData;
+        private readonly string _bossData;
 
-        private bool _isRight = false;
+        private readonly bool _isRight = false;
 
         public BossPreviewUI(float height, string bossData, bool isRight)
         {

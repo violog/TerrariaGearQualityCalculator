@@ -20,8 +20,8 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements
         private UIScrollbar _scrollbarUi;
 
         private const float _heightRow = 30f;
-
-        private List<string> _bossList = new List<string>()
+        
+        private List<string> _bossData = new List<string>()
         {
             "King Slime",
             "Eye of Cthulhu",
@@ -40,6 +40,8 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements
             "Lunatic Cultist",
             "Moon Lord"
         };
+
+        private List<string> _bossList;
 
         public override void OnInitialize()
         {
@@ -63,9 +65,9 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements
             Append(_scrollbarUi);
         }
 
-        public void UpdateBossListUi(string search = "")
+        public void UpdateBossListUi(string search = null)
         {
-            // _bossList = get...
+            _bossList = GetBossList(search);
 
             LoadBosses();
 
@@ -103,8 +105,21 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements
                     row = Grid.CreateRow(_heightRow);
                 }
             }
-
+            
+            _bossListUi.UpdateOrder();
             _bossListUi.Recalculate();
+        }
+
+        private List<string> GetBossList(string search = null)
+        {
+            if (!string.IsNullOrEmpty(search))
+            {
+                return _bossData
+                    .Where(word => word.Contains(search, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+            
+            return _bossData;
         }
 
         public override void Update(GameTime gameTime)

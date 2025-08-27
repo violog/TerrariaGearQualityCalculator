@@ -20,9 +20,11 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements
 
         private bool _isFocused = false;
 
-        private string _placeholder = "Search...";
+        private readonly string _placeholder = "Search...";
 
         public string Text => _searchUi.Text;
+
+        private string OldText = "";
 
         public string Placeholder => _placeholder;
 
@@ -50,23 +52,36 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements
             Append(_searchUi);
         }
 
-        public void Focus()
+        public bool NeedSearch()
         {
-            if (!_isFocused)
+            if ((_searchUi.Text == _placeholder && !_isFocused) || OldText.Equals(_searchUi.Text))
             {
-                Main.clrInput();
-                _isFocused = true;
-                Main.blockInput = true;
+                return false;
             }
+            
+            return true;
+        }
+        
+        public void ResetSearch()
+        {
+            OldText = _searchUi.Text;
         }
 
-        public void Unfocus()
+        private void Focus()
         {
-            if (_isFocused)
-            {
-                _isFocused = false;
-                Main.blockInput = false;
-            }
+            if (_isFocused) return;
+            
+            Main.clrInput();
+            _isFocused = true;
+            Main.blockInput = true;
+        }
+
+        private void Unfocus()
+        {
+            if (!_isFocused) return;
+            
+            _isFocused = false;
+            Main.blockInput = false;
         }
 
         private static bool JustPressed(Keys key)
