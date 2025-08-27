@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using Terraria;
+using Terraria.ID;
 using TerrariaGearQualityCalculator.Calculators;
 using Terraria.Utilities;
+using TerrariaGearQualityCalculator.Calculators.Trivial;
+using TerrariaGearQualityCalculator.Tools;
 
 namespace TerrariaGearQualityCalculator.Storage;
 
@@ -24,21 +27,18 @@ public class FileBackend<T>(string filePath) : IBackend where T : ICalculation
     {
         if (!FileUtilities.Exists(FilePath, false))
         {
-            Write([]);
+            var cc = Initializer.Init();
+            Write(cc.Cast<T>().ToList());
             return [];
         }
 
         // The file is not that big to read it async
         var raw = FileUtilities.ReadAllBytes(FilePath, false);
-        // var listType = typeof(List<>).MakeGenericType(CalcType);
-        // JsonSerializer.Deserialize(raw, listType);
-        // var file = JsonSerializer.Deserialize<CalculationEntry>(raw)!;
         List<T> list = [];
         try
         {
             var file = JsonSerializer.Deserialize<Head>(raw)!;
             list = JsonSerializer.Deserialize<List<T>>(file.Items.GetRawText())!;
-            // list = file.Items.Deserialize<List<T>>()!;
         }
         catch (Exception e)
         {
@@ -59,7 +59,8 @@ public class FileBackend<T>(string filePath) : IBackend where T : ICalculation
     {
         if (!FileUtilities.Exists(FilePath, false))
         {
-            Write([]);
+            var cc = Initializer.Init();
+            Write(cc.Cast<T>().ToList());
             Main.NewText($"Called Save() before initialization for file {FilePath}", 128, 255, 0);
             return;
         }

@@ -1,6 +1,6 @@
 namespace TerrariaGearQualityCalculator.Calculators.Trivial;
 
-internal class TrivialCalculation(int id, decimal playerDps, decimal playerTime, decimal bossRemainingHp) : ICalculation
+internal class TrivialCalculation(int id, decimal playerDps = 0, decimal playerTime = 0, decimal bossRemainingHp = 0) : ICalculation
 {
     public int Id { get; } = id;
     public decimal PlayerDps { get; } = playerDps;
