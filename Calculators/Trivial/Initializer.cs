@@ -7,8 +7,8 @@ internal static class Initializer
 {
     internal static List<ICalculation> Init()
     {
-        var result = new  List<ICalculation>(50);
-        
+        var result = new List<ICalculation>(50);
+
         foreach (var pair in ContentSamples.NpcsByNetId)
         {
             var npc = pair.Value;

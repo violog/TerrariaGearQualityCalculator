@@ -9,11 +9,14 @@ using Terraria;
 using Terraria.GameInput;
 using Terraria.ModLoader;
 using Terraria.UI;
+using TerrariaGearQualityCalculator.Calculators;
 
 namespace TerrariaGearQualityCalculator.Content.UI.Calculator
 {
     public class CalculatorUISystem : ModSystem
     {
+        internal IModelStorage Storage { get; private set; }
+
         internal UserInterface CalculatorInterface;
 
         internal CalculatorUI CalculatorUi;
@@ -24,6 +27,8 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator
         {
             if (!Main.dedServ)
             {
+                Storage = new State().Storage;
+
                 CalculatorInterface = new UserInterface();
 
                 CalculatorUi = new CalculatorUI();
@@ -56,6 +61,7 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator
                         {
                             CalculatorInterface.Draw(Main.spriteBatch, _lastUpdateUiGameTime);
                         }
+
                         return true;
                     },
                     InterfaceScaleType.UI));
@@ -86,7 +92,6 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator
 
         public override void Unload()
         {
-     
         }
     }
 }
