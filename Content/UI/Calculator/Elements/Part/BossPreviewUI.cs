@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 
@@ -21,10 +22,7 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements.Part
             _height = height;
             _bossData = bossData;
             _isRight = isRight;
-        }
-
-        public override void OnInitialize()
-        {
+            
             Width.Set(0, 0.48f);
             Height.Set(_height, 0f);
             HAlign = 0f;

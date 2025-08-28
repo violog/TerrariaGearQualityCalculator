@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 using TerrariaGearQualityCalculator.Content.UI.Calculator.Elements.Part;
@@ -15,9 +16,9 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements
 {
     internal class BossListUI : UIPanel
     {
-        private UIList _bossListUi;
+        private UIList _bossListUi = null;
 
-        private UIScrollbar _scrollbarUi;
+        private UIScrollbar _scrollbarUi = null;
 
         private const float _heightRow = 30f;
         
@@ -104,6 +105,11 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements
                     countElementsInRow = 0;
                     row = Grid.CreateRow(_heightRow);
                 }
+            }
+            
+            if (countElementsInRow > 0)
+            {
+                _bossListUi.Add(row);
             }
             
             _bossListUi.UpdateOrder();

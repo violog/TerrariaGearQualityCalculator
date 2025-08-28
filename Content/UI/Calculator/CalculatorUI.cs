@@ -79,14 +79,14 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator
 
         public override void Update(GameTime gameTime)
         {
-            base.Update(gameTime);
-            
             if (_searchUi.NeedSearch())
             {
                 _bossListUi.UpdateBossListUi(_searchUi.Text);
                 
                 _searchUi.ResetSearch();
             }
+            
+            base.Update(gameTime);
         }
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
