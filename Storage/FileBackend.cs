@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using Terraria;
+using Terraria.ModLoader;
 using TerrariaGearQualityCalculator.Calculators;
 using TerrariaGearQualityCalculator.Calculators.Trivial;
 
@@ -11,9 +12,20 @@ namespace TerrariaGearQualityCalculator.Storage;
 
 // FileBackend stores all calculations in a file with the following structure:
 // { "Type": "DotnetICalculationImplementationTypeName", "Items": [calculations...]}
-public class FileBackend<T>(string filePath) : IBackend where T : ICalculation
+public class FileBackend<T> : IBackend where T : ICalculation
 {
-    private string FilePath { get; } = filePath;
+    private const string DbDirName = "TerrariaGearQualityCalculator";
+    private string FilePath { get; }
+
+    public FileBackend(string fileName)
+    {
+        var dirPath = string.Concat(Main.SavePath, Path.DirectorySeparatorChar, DbDirName);
+        if (!Directory.Exists(dirPath))
+            Directory.CreateDirectory(dirPath);
+
+        var dbPath = string.Concat(dirPath, Path.DirectorySeparatorChar, fileName);
+        FilePath = dbPath;
+    }
 
     public List<ICalculation> Load()
     {
@@ -25,7 +37,7 @@ public class FileBackend<T>(string filePath) : IBackend where T : ICalculation
 
         // The file is not that big to read it async
         var raw = File.ReadAllBytes(FilePath);
-        List<T> list = [];
+        List<T> list;
         try
         {
             var file = JsonSerializer.Deserialize<Head>(raw)!;
@@ -37,8 +49,8 @@ public class FileBackend<T>(string filePath) : IBackend where T : ICalculation
             var dst = $"{FilePath}.backup-${time}.json";
             File.Copy(FilePath, FilePath, true);
             list = Write([]);
-            // TODO: find a way to log the error, for now chat will suffice
-            // var log = ModContent.GetInstance<TerrariaGearQualityCalculator>().Instance.Logger;
+            // TODO: implement logging with levels, at least debug/error
+            // chat logging might be more convenient than in-file
             Main.NewText($"FileStorage.Load failed, the old file backed up to {dst}, the new file was created. {e}",
                 255, 0, 0);
         }

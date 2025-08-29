@@ -15,7 +15,7 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator
 {
     public class CalculatorUISystem : ModSystem
     {
-        internal IModelStorage Storage { get; private set; }
+        internal IModelStorage Storage = State.Instance.Storage;
 
         internal UserInterface CalculatorInterface;
 
@@ -27,8 +27,6 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator
         {
             if (!Main.dedServ)
             {
-                Storage = new State().Storage;
-
                 CalculatorInterface = new UserInterface();
 
                 CalculatorUi = new CalculatorUI();
