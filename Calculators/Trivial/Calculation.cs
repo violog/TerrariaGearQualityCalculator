@@ -1,20 +1,50 @@
+using System.Collections.Generic;
 using Terraria;
+using TerrariaGearQualityCalculator.Events;
 
 namespace TerrariaGearQualityCalculator.Calculators.Trivial;
 
-internal class TrivialCalculation(int id, int playerDps = 0, decimal playerTime = 0, decimal bossRemainingHp = 0)
+internal class TrivialCalculation(int id)
     : ICalculation
 {
-    internal TrivialCalculation(NPC boss, decimal fightTime): this(boss.netID, 0, fightTime, boss.life)
+    internal const decimal Infinity = decimal.MaxValue;
+    private const decimal TicksPerSecond = 60;
+
+    internal TrivialCalculation(Player player, NPC boss, int fightTimeTicks, List<PlayerHitEvent> hits) :
+        this(boss.netID)
     {
-            PlayerDps = (int)((boss.lifeMax - boss.life) / fightTime);
+        var fightTimeSec = fightTimeTicks / TicksPerSecond;
+        BossRemainingHp = boss.life;
+        PlayerDps = (int)((boss.lifeMax - boss.life) / fightTimeSec);
+        BossTime = (decimal)boss.lifeMax / PlayerDps;
+
+        var prev = new PlayerHitEvent(player.statLifeMax, 0);
+        decimal dps = 0;
+
+        foreach (var hit in hits)
+        {
+            var dmg = prev.Health - hit.Health;
+            var dt = (hit.Timestamp - prev.Timestamp) / TicksPerSecond;
+            if (dt == 0) continue;
+            dps += dmg / dt;
+            prev = hit;
+        }
+
+        BossDps = (int)dps;
+
+        if (player.statLife == 0)
+            PlayerTime = fightTimeSec;
+        else
+            PlayerTime = BossDps == 0 ? Infinity : (decimal)player.statLifeMax / BossDps;
     }
-        
+
+    internal int PlayerDps { get; }
+    internal int BossRemainingHp { get; }
+    internal int BossDps { get; }
+
     public int Id { get; } = id;
-    public decimal PlayerTime { get; } = playerTime;
-    public decimal BossTime { get; } = bossRemainingHp / playerTime;
-    public int PlayerDps { get; } = playerDps;
-    public decimal BossRemainingHp { get; } = bossRemainingHp;
+    public decimal PlayerTime { get; }
+    public decimal BossTime { get; }
 
     public ICalculationModelWritable ToModel()
     {

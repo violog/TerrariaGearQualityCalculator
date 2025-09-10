@@ -6,23 +6,26 @@ namespace TerrariaGearQualityCalculator.Calculators.Trivial;
 
 internal class CalculationModel : ICalculationModelWritable
 {
+    private const string LocalizationPrefix = "Mods.TerrariaGearQualityCalculator.CalculationModels.Trivial.";
+
     static CalculationModel()
     {
         // preserve this order in values
         StaticDetailsAttributes =
         [
-            Language.GetText("Mods.TerrariaGearQualityCalculator.CalculationModels.Trivial.Sr"),
-            Language.GetText("Mods.TerrariaGearQualityCalculator.CalculationModels.Trivial.PlayerTime"),
-            Language.GetText("Mods.TerrariaGearQualityCalculator.CalculationModels.Trivial.BossTime"),
-            Language.GetText("Mods.TerrariaGearQualityCalculator.CalculationModels.Trivial.PlayerDps"),
-            Language.GetText("Mods.TerrariaGearQualityCalculator.CalculationModels.Trivial.BossRemainingHp")
+            GetText("Sr"),
+            GetText("PlayerTime"),
+            GetText("BossTime"),
+            GetText("PlayerDps"),
+            GetText("BossRemainingHp"),
+            GetText("BossDps")
         ];
     }
 
     public CalculationModel(TrivialCalculation calculation)
     {
         var npc = ContentSamples.NpcsByNetId[calculation.Id];
-        if (npc == null) throw new NullReferenceException($"NPC not found for id {Calc.Id}");
+        if (npc == null) throw new NullReferenceException($"NPC not found for id {calculation.Id}");
 
         Name = npc.FullName;
         Update(calculation);
@@ -46,11 +49,22 @@ internal class CalculationModel : ICalculationModelWritable
 
         DetailsValues =
         [
-            Sr.ToString(),
-            Calc.PlayerTime.ToString(),
-            Calc.BossTime.ToString(),
-            Calc.PlayerDps.ToString(),
-            Calc.BossRemainingHp.ToString()
+            InfToString(Sr),
+            InfToString(Calc.PlayerTime),
+            InfToString(Calc.BossTime),
+            InfToString(Calc.PlayerDps),
+            InfToString(Calc.BossRemainingHp),
+            InfToString(Calc.BossDps)
         ];
+    }
+
+    private static string InfToString(decimal value)
+    {
+        return value == TrivialCalculation.Infinity ? GetText("Infinity").ToString() : value.ToString();
+    }
+
+    private static LocalizedText GetText(string key)
+    {
+        return Language.GetText(LocalizationPrefix + key);
     }
 }

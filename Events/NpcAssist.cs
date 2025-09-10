@@ -1,8 +1,6 @@
-using System;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
-using Terraria.Localization;
 using Terraria.ModLoader;
 using TerrariaGearQualityCalculator.Storage;
 
@@ -22,7 +20,7 @@ internal class NpcAssist : GlobalNPC
             return;
 
         var player = Main.LocalPlayer.GetModPlayer<PlayerAssist>();
-        player.Trackers.Add(npc.netID, new Tracker(npc.netID));
+        player.Trackers.Add(npc.netID, new Tracker());
     }
 
     // When an NPC is killed and fully inactive the fight has ended, stop tracker and save calculation
@@ -32,7 +30,7 @@ internal class NpcAssist : GlobalNPC
         player.Trackers.Remove(npc.netID, out var tracker);
 
         if (tracker != null)
-            _storage.Save(tracker.CalcTrivial);
+            _storage.Save(tracker.CalcTrivial(npc));
         else
             Main.NewText(
                 $"[WARN] npc id={npc.netID} name={npc.FullName} was killed, but the respective tracker was not found",
