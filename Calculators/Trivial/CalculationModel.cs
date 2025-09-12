@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using Terraria.ID;
 using Terraria.Localization;
 
@@ -6,8 +7,6 @@ namespace TerrariaGearQualityCalculator.Calculators.Trivial;
 
 internal class CalculationModel : ICalculationModelWritable
 {
-    private const string LocalizationPrefix = "Mods.TerrariaGearQualityCalculator.CalculationModels.Trivial.";
-
     // TODO: test this on language change, I assume it will break
     static CalculationModel()
     {
@@ -38,9 +37,8 @@ internal class CalculationModel : ICalculationModelWritable
 
     private static LocalizedText[] StaticDetailsAttributes { get; }
 
-    private TrivialCalculation Calc { get; set; }
     public string Name { get; }
-    public decimal Sr => (Calc as ICalculation).Sr;
+    public decimal Sr { get; private set; }
 
     public LocalizedText[] DetailsAttributes => StaticDetailsAttributes;
 
@@ -48,29 +46,32 @@ internal class CalculationModel : ICalculationModelWritable
 
     public void Update(ICalculation calculation)
     {
-        Calc = (TrivialCalculation)calculation;
-
+        Sr = calculation.Sr;
+        var calc = (TrivialCalculation)calculation;
         DetailsValues =
         [
-            InfToString(Sr),
-            InfToString(Calc.PlayerTime),
-            InfToString(Calc.BossTime),
-            InfToString(Calc.PlayerDps),
-            InfToString(Calc.BossRemainingHp),
-            InfToString(Calc.BossDps),
-            Calc.Gear.Weapon,
-            $"{Calc.Gear.Helmet}, {Calc.Gear.Chest}, {Calc.Gear.Legs}",
-            string.Join(", ", Calc.Gear.Accessories.ToArray())
+            FormatFixed(Sr, 3),
+            FormatFixed(calc.PlayerTime, 3),
+            FormatFixed(calc.BossTime, 3),
+            FormatFixed(calc.PlayerDps),
+            FormatFixed(calc.BossRemainingHp),
+            FormatFixed(calc.BossDps),
+            calc.Gear.Weapon,
+            $"{calc.Gear.Helmet}, {calc.Gear.Chest}, {calc.Gear.Legs}",
+            string.Join(", ", calc.Gear.Accessories)
         ];
     }
 
-    private static string InfToString(decimal value)
+    private static string FormatFixed(decimal value, int digits = 0)
     {
-        return value == TrivialCalculation.Infinity ? GetText("Infinity").ToString() : value.ToString();
+        return value == TrivialCalculation.Infinity
+            ? GetText("Infinity").ToString()
+            : value.ToString($"F{digits}", CultureInfo.InvariantCulture);
     }
 
     private static LocalizedText GetText(string key)
     {
-        return Language.GetText(LocalizationPrefix + key);
+        const string localizationPrefix = "Mods.TerrariaGearQualityCalculator.CalculationModels.Trivial.";
+        return Language.GetText(localizationPrefix + key);
     }
 }

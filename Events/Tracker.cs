@@ -11,6 +11,6 @@ public class Tracker
 
     internal TrivialCalculation CalcTrivial(NPC boss)
     {
-        return new TrivialCalculation(Main.LocalPlayer, boss, FightTicks, null);
+        return new TrivialCalculation(Main.LocalPlayer, boss, FightTicks, Hits);
     }
 }

@@ -14,9 +14,7 @@ internal class NpcAssist : GlobalNPC
     // When a boss spawns, set up the world and player trackers for the upcoming fight.
     public override void OnSpawn(NPC npc, IEntitySource source)
     {
-        if (Main.netMode is not NetmodeID.SinglePlayer)
-            return;
-        if (!npc.boss)
+        if (!npc.boss || Main.netMode is not NetmodeID.SinglePlayer)
             return;
 
         var player = Main.LocalPlayer.GetModPlayer<PlayerAssist>();
@@ -26,6 +24,9 @@ internal class NpcAssist : GlobalNPC
     // When an NPC is killed and fully inactive the fight has ended, stop tracker and save calculation
     public override void OnKill(NPC npc)
     {
+        if (!npc.boss || Main.netMode is not NetmodeID.SinglePlayer)
+            return;
+
         var player = Main.LocalPlayer.GetModPlayer<PlayerAssist>();
         player.Trackers.Remove(npc.netID, out var tracker);
 

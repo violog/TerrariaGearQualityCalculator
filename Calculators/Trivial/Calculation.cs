@@ -42,7 +42,7 @@ internal class TrivialCalculation(int id)
     public int PlayerDps { get; }
     public int BossRemainingHp { get; }
     public int BossDps { get; }
-    public PlayerGear Gear { get; }
+    public PlayerGear Gear { get; } = new();
 
     public int Id { get; } = id;
     public decimal PlayerTime { get; }
