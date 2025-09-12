@@ -10,11 +10,12 @@ internal class TrivialCalculation(int id)
     internal const decimal Infinity = decimal.MaxValue;
     private const decimal TicksPerSecond = 60;
 
-    internal TrivialCalculation(Player player, NPC boss, int fightTimeTicks, List<PlayerHitEvent> hits) :
+    internal TrivialCalculation(Player player, NPC boss, int fightTimeTicks, List<PlayerHitEvent> hits,
+        List<Item> weapons) :
         this(boss.netID)
     {
         var fightTimeSec = fightTimeTicks / TicksPerSecond;
-        Gear = new PlayerGear(player);
+        Gear = new PlayerGear(player, weapons);
         BossRemainingHp = boss.life;
         PlayerDps = (int)((boss.lifeMax - boss.life) / fightTimeSec);
         BossTime = (decimal)boss.lifeMax / PlayerDps;

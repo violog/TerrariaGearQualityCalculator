@@ -11,14 +11,19 @@ internal class NpcAssist : GlobalNPC
 {
     private static readonly ModelStorage Storage = State.Instance.Storage;
 
-    // When a boss spawns, set up the world and player trackers for the upcoming fight.
+    // When a boss spawns, set up the player tracker for the upcoming fight.
     public override void OnSpawn(NPC npc, IEntitySource source)
     {
         if (!npc.boss || Main.netMode is not NetmodeID.SinglePlayer)
             return;
 
         var player = Main.LocalPlayer.GetModPlayer<PlayerAssist>();
-        player.Trackers.Add(npc.netID, new Tracker());
+        if (!player.Tracker.IsEmpty)
+            Main.NewText(
+                "[INFO] another boss is already being tracked, ignoring new boss",
+                0, 120);
+        else
+            player.Tracker = new Tracker(npc.netID);
     }
 
     // When an NPC is killed and fully inactive the fight has ended, stop tracker and save calculation
@@ -28,13 +33,10 @@ internal class NpcAssist : GlobalNPC
             return;
 
         var player = Main.LocalPlayer.GetModPlayer<PlayerAssist>();
-        player.Trackers.Remove(npc.netID, out var tracker);
+        if (player.Tracker.NpcId != npc.netID)
+            return;
 
-        if (tracker != null)
-            Storage.Save(tracker.CalcTrivial(npc));
-        else
-            Main.NewText(
-                $"[WARN] npc id={npc.netID} name={npc.FullName} was killed, but the respective tracker was not found",
-                100, 255, 0);
+        Storage.Save(player.Tracker.CalcTrivial(npc));
+        player.Tracker = new Tracker();
     }
 }

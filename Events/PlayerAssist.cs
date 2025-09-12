@@ -1,8 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.ID;
 using Terraria.ModLoader;
 using TerrariaGearQualityCalculator.Storage;
 
@@ -13,28 +13,40 @@ internal class PlayerAssist : ModPlayer
 {
     private readonly ModelStorage _storage = State.Instance.Storage;
 
-    // TODO: maybe, refactor this to a single tracker, as multi-boss fights aren't supported
-    internal Dictionary<int, Tracker> Trackers { get; } = [];
+    // Tracker tracks stats only per one boss at the same times
+    internal Tracker Tracker { get; set; } = new();
 
     public override void PreUpdate()
     {
-        foreach (var tracker in Trackers.Values) tracker.FightTicks++;
+        if (Tracker.IsEmpty || Main.netMode is not NetmodeID.SinglePlayer)
+            return;
+
+        var held = Player.HeldItem;
+        // anything with damage is a weapon
+        if (held is not null && held.damage > 0 && !Tracker.Weapons.Exists(item => item.netID == held.netID))
+            Tracker.Weapons.Add(held);
+
+        Tracker.FightTicks++;
     }
 
     // If you are fighting several bosses simultaneously or get hit by smth else,
     // it still counts into the fight of every boss - intended behavior.
-    // The calculator is not designed for multiple bosses fights.
+    // The calculator is designed the way to consider all hits.
     public override void OnHurt(Player.HurtInfo info)
     {
+        if (Tracker.IsEmpty)
+            return;
+
         var player = Main.LocalPlayer.GetModPlayer<PlayerAssist>();
-        foreach (var tr in player.Trackers.Values)
-            tr.Hits.Add(new PlayerHitEvent(player.Player.statLife, tr.FightTicks));
+        Tracker.Hits.Add(new PlayerHitEvent(player.Player.statLife, Tracker.FightTicks));
     }
 
     // Track player deaths during boss fights.
     public override void Kill(double damage, int hitDirection, bool pvp, PlayerDeathReason damageSource)
     {
-        var player = Main.LocalPlayer.GetModPlayer<PlayerAssist>();
+        if (Tracker.IsEmpty)
+            return;
+
         var npcId = damageSource.SourceNPCIndex;
         NPC boss;
         try
@@ -43,15 +55,16 @@ internal class PlayerAssist : ModPlayer
         }
         catch (InvalidOperationException)
         {
-            // FIXME possible workaround: track last known boss health on every hit
+            // FIXME possible workaround: track last known boss health on every hit (fix only when it actually happens)
+            // This will require either introducing new MockNPC class, or adding a couple of constructors with raw values
+            // One more option is to track the boss entry itself, so it won't be garbage-collected
             Main.NewText(
                 $"[ERROR] npc id={npcId} has despawned, was not found or is not a boss",
                 255, 0, 0);
             return;
         }
 
-        // will not fetch all other bosses and record
-        player.Trackers.Remove(npcId, out var tracker);
-        _storage.Save(tracker!.CalcTrivial(boss));
+        _storage.Save(Tracker.CalcTrivial(boss));
+        Tracker = new Tracker();
     }
 }

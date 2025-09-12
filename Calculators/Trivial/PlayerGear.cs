@@ -10,9 +10,10 @@ internal class PlayerGear()
     private const string MissingName = "--";
     private static readonly AccessorySlotLoader Loader = LoaderManager.Get<AccessorySlotLoader>();
 
-    public PlayerGear(Player player) : this()
+    public PlayerGear(Player player, List<Item> weapons) : this()
     {
-        Weapon = GetItemName(player.inventory[0]); // TODO: make slot number configurable
+        foreach (var w in weapons) _weapons.Add(GetItemName(w));
+
         Helmet = GetItemName(player.armor[0]);
         Chest = GetItemName(player.armor[1]);
         Legs = GetItemName(player.armor[2]);
@@ -30,12 +31,13 @@ internal class PlayerGear()
         }
     }
 
-    public string Weapon { get; } = MissingName;
     public string Helmet { get; } = MissingName;
     public string Chest { get; } = MissingName;
     public string Legs { get; } = MissingName;
     public string[] Accessories => _accessories.Count > 0 ? _accessories.ToArray() : [MissingName];
+    public string[] Weapons => _weapons.Count > 0 ? _weapons.ToArray() : [MissingName];
     private List<string> _accessories { get; } = [];
+    private List<string> _weapons { get; } = [];
 
     private static string GetItemName(Item item)
     {

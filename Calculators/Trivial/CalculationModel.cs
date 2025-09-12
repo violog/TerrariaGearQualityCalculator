@@ -7,7 +7,7 @@ namespace TerrariaGearQualityCalculator.Calculators.Trivial;
 
 internal class CalculationModel : ICalculationModelWritable
 {
-    // TODO: test this on language change, I assume it will break
+    // TODO: test this on language change when we add russian localization, I assume it will break
     static CalculationModel()
     {
         // preserve this order in values
@@ -19,8 +19,8 @@ internal class CalculationModel : ICalculationModelWritable
             GetText("PlayerDps"),
             GetText("BossRemainingHp"),
             GetText("BossDps"),
-            GetText("Weapon"),
             // already present in vanilla Terraria
+            Language.GetText("CreativePowers.TabWeapons"),
             Language.GetText("CreativePowers.TabArmor"),
             Language.GetText("CreativePowers.TabAccessories")
         ];
@@ -56,7 +56,7 @@ internal class CalculationModel : ICalculationModelWritable
             FormatFixed(calc.PlayerDps),
             FormatFixed(calc.BossRemainingHp),
             FormatFixed(calc.BossDps),
-            calc.Gear.Weapon,
+            string.Join(", ", calc.Gear.Weapons),
             $"{calc.Gear.Helmet}, {calc.Gear.Chest}, {calc.Gear.Legs}",
             string.Join(", ", calc.Gear.Accessories)
         ];
