@@ -14,6 +14,7 @@ internal class TrivialCalculation(int id)
         this(boss.netID)
     {
         var fightTimeSec = fightTimeTicks / TicksPerSecond;
+        Gear = new PlayerGear(player);
         BossRemainingHp = boss.life;
         PlayerDps = (int)((boss.lifeMax - boss.life) / fightTimeSec);
         BossTime = (decimal)boss.lifeMax / PlayerDps;
@@ -38,9 +39,10 @@ internal class TrivialCalculation(int id)
             PlayerTime = BossDps == 0 ? Infinity : (decimal)player.statLifeMax / BossDps;
     }
 
-    internal int PlayerDps { get; }
-    internal int BossRemainingHp { get; }
-    internal int BossDps { get; }
+    public int PlayerDps { get; }
+    public int BossRemainingHp { get; }
+    public int BossDps { get; }
+    public PlayerGear Gear { get; }
 
     public int Id { get; } = id;
     public decimal PlayerTime { get; }

@@ -8,6 +8,7 @@ Mods: {
 			    PlayerDps: Average player DPS, hp/s
 				BossRemainingHp: Boss remaining HP
 				BossDps: Average boss DPS, hp/s
+				Weapon: Main weapon
 				Infinity: INFINITE
 			}
 		}

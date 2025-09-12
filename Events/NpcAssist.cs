@@ -9,7 +9,7 @@ namespace TerrariaGearQualityCalculator.Events;
 // Reused thanks to https://github.com/JavidPack/BossChecklist
 internal class NpcAssist : GlobalNPC
 {
-    private readonly ModelStorage _storage = State.Instance.Storage;
+    private static readonly ModelStorage Storage = State.Instance.Storage;
 
     // When a boss spawns, set up the world and player trackers for the upcoming fight.
     public override void OnSpawn(NPC npc, IEntitySource source)
@@ -30,7 +30,7 @@ internal class NpcAssist : GlobalNPC
         player.Trackers.Remove(npc.netID, out var tracker);
 
         if (tracker != null)
-            _storage.Save(tracker.CalcTrivial(npc));
+            Storage.Save(tracker.CalcTrivial(npc));
         else
             Main.NewText(
                 $"[WARN] npc id={npc.netID} name={npc.FullName} was killed, but the respective tracker was not found",
