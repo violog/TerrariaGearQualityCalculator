@@ -19,9 +19,7 @@ internal class NpcAssist : GlobalNPC
 
         var player = Main.LocalPlayer.GetModPlayer<PlayerAssist>();
         if (!player.Tracker.IsEmpty)
-            Main.NewText(
-                "[INFO] another boss is already being tracked, ignoring new boss",
-                0, 120);
+            Logger.Info("Another boss is already being tracked, ignoring new boss");
         else
             player.Tracker = new Tracker(npc.netID);
     }

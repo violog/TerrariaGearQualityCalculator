@@ -47,6 +47,7 @@ internal class PlayerAssist : ModPlayer
         if (Tracker.IsEmpty)
             return;
 
+        // this is problematic, as I could have died from fall or mob
         var npcId = damageSource.SourceNPCIndex;
         NPC boss;
         try
@@ -58,9 +59,7 @@ internal class PlayerAssist : ModPlayer
             // FIXME possible workaround: track last known boss health on every hit (fix only when it actually happens)
             // This will require either introducing new MockNPC class, or adding a couple of constructors with raw values
             // One more option is to track the boss entry itself, so it won't be garbage-collected
-            Main.NewText(
-                $"[ERROR] npc id={npcId} has despawned, was not found or is not a boss",
-                255, 0, 0);
+            Logger.Error($"NPC id={npcId} has despawned, was not found or is not a boss");
             return;
         }
 

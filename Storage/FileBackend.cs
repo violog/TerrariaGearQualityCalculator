@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using Terraria;
-using Terraria.ModLoader;
 using TerrariaGearQualityCalculator.Calculators;
 using TerrariaGearQualityCalculator.Calculators.Trivial;
 
@@ -49,10 +48,7 @@ public class FileBackend<T> : IBackend where T : ICalculation
             var dst = $"{FilePath}.backup-${time}.json";
             File.Copy(FilePath, FilePath, true);
             list = Write([]);
-            // TODO: implement logging with levels, at least debug/error
-            // chat logging might be more convenient than in-file
-            Main.NewText($"FileStorage.Load failed, the old file backed up to {dst}, the new file was created. {e}",
-                255, 0, 0);
+            Logger.Warn($"Failed to load storage, the old file backed up to {dst}, the new file was created. {e}");
         }
 
         return list.Cast<ICalculation>().ToList();
@@ -63,7 +59,7 @@ public class FileBackend<T> : IBackend where T : ICalculation
         if (!File.Exists(FilePath))
         {
             Write([]);
-            Main.NewText($"Called Save() before initialization for file {FilePath}", 128, 255, 0);
+            Logger.Info($"Called Store() before initialization for file {FilePath}");
             return;
         }
 

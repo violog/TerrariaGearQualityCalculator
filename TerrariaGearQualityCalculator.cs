@@ -5,15 +5,16 @@ using Terraria.ModLoader;
 namespace TerrariaGearQualityCalculator;
 
 // Please read https://github.com/tModLoader/tModLoader/wiki/Basic-tModLoader-Modding-Guide#mod-skeleton-contents for more information about the various files in a mod.
-internal class TerrariaGearQualityCalculator : Mod
+internal sealed class TerrariaGearQualityCalculator : Mod
 {
-    public static ModKeybind CalculatorHotKey;
+    internal static ModKeybind CalculatorHotKey;
 
     public override void Load()
     {
         if (Main.netMode != NetmodeID.SinglePlayer)
         {
-            Main.NewText($"TerrariaGearQualityCalculator is not supported in multiplayer!", 255, 0, 0);
+            // TODO: properly load/unload the mod: no logic should be executed if the mod isn't loaded, not just a hotkey
+            Logger.Error("TerrariaGearQualityCalculator is not supported in multiplayer!");
             return;
         }
 
