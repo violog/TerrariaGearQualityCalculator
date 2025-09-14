@@ -26,12 +26,13 @@ public class ModelStorage : MemoryStorage, IModelStorage
         if (!TGQC.IsSingleplayer) return 0;
 
         var i = base.Save(boss);
+        var model = boss.ToModel();
         if (Calculations.Count > Models.Count)
-            Models.Add(boss.ToModel());
+            Models.Add(model);
         else
             Models[i].Update(boss);
 
-        TGQC.Log.Debug($"Saved calc: {boss.ToModel()}");
+        TGQC.Log.Debug($"Saved calc: {model}");
         return i;
     }
 }

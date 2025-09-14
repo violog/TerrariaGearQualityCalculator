@@ -1,3 +1,4 @@
+using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
@@ -35,9 +36,16 @@ internal class NpcAssist : GlobalNPC
             return;
 
         var player = Main.LocalPlayer.GetModPlayer<PlayerAssist>();
-        if (player.Tracker.NpcId != npc.netID)
+        var npcId = player.Tracker.NpcId;
+        if (npcId != npc.netID)
         {
-            TGQC.Log.Debug($"Killed NPC id={npc.netID}, but tracking NPC id={player.Tracker.NpcId}");
+            var boss = Main.npc.FirstOrDefault(n => n.netID == npcId && n.boss);
+            // continue if we just killed an untracked boss, stop tracking when it has bugged
+            if (boss is not null && boss.netID == npc.netID) return;
+
+            TGQC.Log.Warn(
+                $"Killed boss id={npc.netID}, but tracking id={npcId}; tracking bugged, stopping and skipping");
+            player.Tracker = new Tracker();
             return;
         }
 

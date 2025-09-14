@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
@@ -17,13 +18,16 @@ internal class PlayerAssist : ModPlayer
 
     public override void PreUpdate()
     {
-        if (TGQC.IsSingleplayer || Tracker.IsEmpty)
+        if (!TGQC.IsSingleplayer || Tracker.IsEmpty)
             return;
 
         var held = Player.HeldItem;
         // anything with damage is a weapon
         if (held is not null && held.damage > 0 && !Tracker.Weapons.Exists(item => item.netID == held.netID))
+        {
+            TGQC.Log.Debug($"Player used new weapon: {held.Name}");
             Tracker.Weapons.Add(held);
+        }
 
         Tracker.FightTicks++;
     }
@@ -33,11 +37,14 @@ internal class PlayerAssist : ModPlayer
     // The calculator is designed the way to consider all hits.
     public override void OnHurt(Player.HurtInfo info)
     {
-        if (TGQC.IsSingleplayer || Tracker.IsEmpty)
+        if (!TGQC.IsSingleplayer || Tracker.IsEmpty)
             return;
 
         var player = Main.LocalPlayer.GetModPlayer<PlayerAssist>();
-        Tracker.Hits.Add(new PlayerHitEvent(player.Player.statLife, Tracker.FightTicks));
+        // damage is not yet applied on statLife
+        var hit = new PlayerHitEvent(player.Player.statLife - info.Damage, Tracker.FightTicks);
+        TGQC.Log.Debug($"Player hit: {hit}");
+        Tracker.Hits.Add(hit);
     }
 
     // Track player deaths during boss fights.
@@ -45,27 +52,24 @@ internal class PlayerAssist : ModPlayer
     // For example, BossRemainingHp is 0, and fatal hit is not recorded when die-on-hit setting is enabled
     public override void UpdateDead()
     {
-        if (TGQC.IsSingleplayer || Tracker.IsEmpty)
+        if (!TGQC.IsSingleplayer || Tracker.IsEmpty)
             return;
 
         var npcId = Tracker.NpcId;
-        NPC boss;
         try
         {
-            boss = Main.npc.First(n => n.netID == npcId && n.boss);
+            var boss = Main.npc.First(n => n.netID == npcId && n.boss);
+            _storage.Save(Tracker.CalcTrivial(boss));
+            TGQC.Log.Debug($"Stored tracker of NPC id={Tracker.NpcId}: fightTicks={Tracker.FightTicks}");
+            Tracker = new Tracker();
         }
-        catch (InvalidOperationException)
+        catch (Exception e) when (e is InvalidOperationException or KeyNotFoundException)
         {
             // Possible workaround: track last known boss health on every hit (fix only when it actually happens)
             // This will require either introducing new MockNPC class, or adding a couple of constructors with raw values.
             // One more option is to track the boss entry itself, so it won't be garbage-collected.
             // Due to Nycro's NoHit interference issue, the best option would be to track boss health separately.
             TGQC.Log.Error($"NPC id={npcId} has despawned, was not found or is not a boss");
-            return;
         }
-
-        _storage.Save(Tracker.CalcTrivial(boss));
-        TGQC.Log.Debug($"Stored tracker of NPC id={Tracker.NpcId}: fightTicks={Tracker.FightTicks}");
-        Tracker = new Tracker();
     }
 }
