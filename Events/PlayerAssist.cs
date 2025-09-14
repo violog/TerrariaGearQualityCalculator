@@ -43,6 +43,8 @@ internal class PlayerAssist : ModPlayer
 
     // Track player deaths during boss fights.
     // BUG: known issue: when Nycro's NoHit or similar mod to interfere with death is enabled, the stats won't be correct
+    // also, BossRemainingHp is 0 on dead, which isn't right - try fixing with PreKill override;
+    // also, see DB - invalid too big numbers are stored if you divide INF/5.0 e.g., INF must be preserved, try built-in INF
     public override void UpdateDead()
     {
         if (Tracker.IsEmpty || Main.netMode != NetmodeID.SinglePlayer)

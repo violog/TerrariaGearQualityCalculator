@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Terraria;
 using TerrariaGearQualityCalculator.Calculators;
 using TerrariaGearQualityCalculator.Calculators.Trivial;
@@ -16,6 +17,9 @@ public class FileBackend<T> : IBackend where T : ICalculation
 {
     private const string DbDirName = "TerrariaGearQualityCalculator";
     private string FilePath { get; }
+
+    private readonly JsonSerializerOptions _jsonOpts = new()
+        { NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals };
 
     public FileBackend(string fileName)
     {
@@ -40,8 +44,8 @@ public class FileBackend<T> : IBackend where T : ICalculation
         List<T> list;
         try
         {
-            var file = JsonSerializer.Deserialize<Head>(raw)!;
-            list = JsonSerializer.Deserialize<List<T>>(file.Items.GetRawText())!;
+            var file = JsonSerializer.Deserialize<Head>(raw, _jsonOpts)!;
+            list = JsonSerializer.Deserialize<List<T>>(file.Items.GetRawText(), _jsonOpts)!;
         }
         catch (Exception e)
         {
@@ -77,9 +81,9 @@ public class FileBackend<T> : IBackend where T : ICalculation
     {
         if (calculations.Count == 0) calculations = Initializer.Init().Cast<T>().ToList();
 
-        var items = JsonSerializer.SerializeToElement(calculations)!;
+        var items = JsonSerializer.SerializeToElement(calculations, _jsonOpts)!;
         var head = new Head(typeof(T).FullName, items);
-        var rawHead = JsonSerializer.SerializeToUtf8Bytes(head);
+        var rawHead = JsonSerializer.SerializeToUtf8Bytes(head, _jsonOpts);
         File.WriteAllBytes(FilePath, rawHead);
         return calculations;
     }

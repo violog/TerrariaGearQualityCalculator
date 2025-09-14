@@ -7,8 +7,7 @@ namespace TerrariaGearQualityCalculator.Calculators.Trivial;
 internal class TrivialCalculation(int id)
     : ICalculation
 {
-    internal const decimal Infinity = decimal.MaxValue;
-    private const decimal TicksPerSecond = 60;
+    private const double TicksPerSecond = 60;
 
     internal TrivialCalculation(Player player, NPC boss, int fightTimeTicks, List<PlayerHitEvent> hits,
         List<Item> weapons) :
@@ -17,11 +16,12 @@ internal class TrivialCalculation(int id)
         var fightTimeSec = fightTimeTicks / TicksPerSecond;
         Gear = new PlayerGear(player, weapons);
         BossRemainingHp = boss.life;
+        // Can't deal damage in 0 ticks
         PlayerDps = fightTimeSec == 0 ? 0 : (int)((boss.lifeMax - boss.life) / fightTimeSec);
-        BossTime = PlayerDps == 0 ? 0 : (decimal)boss.lifeMax / PlayerDps;
+        BossTime = (double)boss.lifeMax / PlayerDps;
 
         var prev = new PlayerHitEvent(player.statLifeMax, 0);
-        decimal dps = 0;
+        double dps = 0;
 
         foreach (var hit in hits)
         {
@@ -37,7 +37,12 @@ internal class TrivialCalculation(int id)
         if (player.statLife == 0)
             PlayerTime = fightTimeSec;
         else
-            PlayerTime = BossDps == 0 ? Infinity : (decimal)player.statLifeMax / BossDps;
+            // This is the right measurement, because all life regen and health potions
+            // have been taken into account while counting BossDps.
+            // This should be tested and improved, e.g. for the case when player uses big
+            // health potion and kills the boss too quickly, not counting health potion cooldown
+            // if the fight would proceed further.
+            PlayerTime = (double)player.statLifeMax / BossDps;
     }
 
     public int PlayerDps { get; }
@@ -46,8 +51,8 @@ internal class TrivialCalculation(int id)
     public PlayerGear Gear { get; } = new();
 
     public int Id { get; } = id;
-    public decimal PlayerTime { get; }
-    public decimal BossTime { get; }
+    public double PlayerTime { get; }
+    public double BossTime { get; }
 
     public ICalculationModelWritable ToModel()
     {

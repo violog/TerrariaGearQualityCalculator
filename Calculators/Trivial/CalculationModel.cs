@@ -40,7 +40,7 @@ internal class CalculationModel : ICalculationModelWritable
     private static LocalizedText[] StaticDetailsAttributes { get; }
 
     public string Name { get; }
-    public decimal Sr { get; private set; }
+    public double Sr { get; private set; }
 
     public LocalizedText[] DetailsAttributes => StaticDetailsAttributes;
 
@@ -71,9 +71,12 @@ internal class CalculationModel : ICalculationModelWritable
         return $"Name=${Name} DetailsValues={details}";
     }
 
-    private static string FormatFixed(decimal value, int digits = 0)
+    private static string FormatFixed(double value, int digits = 0)
     {
-        return value == TrivialCalculation.Infinity
+        if (value < 0)
+            value = 0; // shouldn't have negative values, this happened to BossRemainingHp
+
+        return double.IsPositiveInfinity(value)
             ? GetText("Infinity").ToString()
             : value.ToString($"F{digits}", CultureInfo.InvariantCulture);
     }
