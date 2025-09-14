@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using Terraria;
 using TerrariaGearQualityCalculator.Events;
+using TGQC = TerrariaGearQualityCalculator.TerrariaGearQualityCalculator;
 
 namespace TerrariaGearQualityCalculator.Calculators.Trivial;
 
@@ -56,6 +58,14 @@ internal class TrivialCalculation(int id)
 
     public ICalculationModelWritable ToModel()
     {
-        return new CalculationModel(this);
+        try
+        {
+            return new CalculationModel(this);
+        }
+        catch (Exception e) when (e is InvalidOperationException or KeyNotFoundException)
+        {
+            TGQC.Log.Info($"NPC {Id} not found; the respective mod could have been unloaded; skipping.");
+            return null;
+        }
     }
 }

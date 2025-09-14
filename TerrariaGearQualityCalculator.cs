@@ -30,6 +30,11 @@ internal sealed class TerrariaGearQualityCalculator : Mod
 
         CalculatorHotKey = KeybindLoader.RegisterKeybind(this, "GearQualityCalculator", "P");
         Log = new Log(true); // make configurable?
+    }
+
+    public override void PostSetupContent()
+    {
+        // must be here to load modded bosses properly
         var backend = new FileBackend<TrivialCalculation>(StorageFileName);
         Storage = new ModelStorage(backend);
     }

@@ -1,8 +1,8 @@
-using System;
 using System.Globalization;
 using System.Linq;
 using Terraria.ID;
 using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace TerrariaGearQualityCalculator.Calculators.Trivial;
 
@@ -28,10 +28,16 @@ internal class CalculationModel : ICalculationModelWritable
         ];
     }
 
+    // CalculationModel throws InvalidOperationException when NPC with such ID is not found: ensure to catch it
     public CalculationModel(TrivialCalculation calculation)
     {
         var npc = ContentSamples.NpcsByNetId[calculation.Id];
-        if (npc == null) throw new NullReferenceException($"NPC not found for id {calculation.Id}");
+        if (npc == null)
+        {
+            var modNpc = ModContent.GetContent<ModNPC>()
+                .First(n => n.NPC.netID == calculation.Id);
+            npc = modNpc.NPC;
+        }
 
         Name = npc.FullName;
         Update(calculation);

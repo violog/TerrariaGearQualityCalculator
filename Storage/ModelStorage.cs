@@ -10,7 +10,12 @@ public class ModelStorage : MemoryStorage, IModelStorage
     public ModelStorage(IBackend backend) : base(backend)
     {
         Models = new List<ICalculationModelWritable>(Calculations.Count);
-        foreach (var calc in Calculations) Models.Add(calc.ToModel());
+        foreach (var calc in Calculations)
+        {
+            var model = calc.ToModel();
+            if (model is null) continue; // happens when the mod for calculation was unloaded
+            Models.Add(model);
+        }
     }
 
     private List<ICalculationModelWritable> Models { get; }
