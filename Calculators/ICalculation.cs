@@ -4,14 +4,18 @@ public interface ICalculation
 {
     // Id is a boss NPCID (we will decide later for modded)
     public int Id { get; }
-    public decimal BossTime { get; }
 
-    public decimal PlayerTime { get; }
+    // BossTime is estimated or actual time required to kill the boss, in seconds
+    public double BossTime { get; }
+
+    // PlayerTime is estimated or actual time the player can survive against the boss, in seconds
+    public double PlayerTime { get; }
 
     // Sr is Survivability Ratio that effectively shows gear quality for the specific boss fight
-    public decimal Sr => PlayerTime / BossTime;
+    public double Sr => PlayerTime == 0 && BossTime == 0 ? 0 : PlayerTime / BossTime;
 
-    // CacheValid shows whether the cache can be reused, it should be updated accordingly
-    // It is convenient to store on lowest calculation level and propagate as values change
-    public bool CacheValid { get; set; }
+    // ToModel generates a writable model of the calculation.
+    // It is recommended to call this method once and cache the model,
+    // updating only calculation values.
+    public ICalculationModelWritable ToModel();
 }

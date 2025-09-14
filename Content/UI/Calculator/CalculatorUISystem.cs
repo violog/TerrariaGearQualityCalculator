@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Terraria;
-using Terraria.GameInput;
+using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
+using TerrariaGearQualityCalculator.Calculators;
 
 namespace TerrariaGearQualityCalculator.Content.UI.Calculator
 {
     public class CalculatorUISystem : ModSystem
     {
+        internal IModelStorage Storage = TerrariaGearQualityCalculator.Storage;
+
         internal UserInterface CalculatorInterface;
 
         internal CalculatorUI CalculatorUi;
@@ -22,14 +20,11 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator
 
         public override void Load()
         {
-            if (!Main.dedServ)
-            {
-                CalculatorInterface = new UserInterface();
+            CalculatorInterface = new UserInterface();
 
-                CalculatorUi = new CalculatorUI();
+            CalculatorUi = new CalculatorUI();
 
-                CalculatorUi.Activate();
-            }
+            CalculatorUi.Activate();
         }
 
         public override void UpdateUI(GameTime gameTime)
@@ -56,6 +51,7 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator
                         {
                             CalculatorInterface.Draw(Main.spriteBatch, _lastUpdateUiGameTime);
                         }
+
                         return true;
                     },
                     InterfaceScaleType.UI));
@@ -86,7 +82,10 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator
 
         public override void Unload()
         {
-     
+            Storage = null;
+            CalculatorInterface = null;
+            CalculatorUi = null;
+            _lastUpdateUiGameTime = null;
         }
     }
 }

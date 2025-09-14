@@ -1,55 +1,60 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Terraria;
 using TerrariaGearQualityCalculator.Calculators;
-using Terraria.Utilities;
+using TerrariaGearQualityCalculator.Calculators.Trivial;
+using TGQC = TerrariaGearQualityCalculator.TerrariaGearQualityCalculator;
 
 namespace TerrariaGearQualityCalculator.Storage;
 
 // FileBackend stores all calculations in a file with the following structure:
 // { "Type": "DotnetICalculationImplementationTypeName", "Items": [calculations...]}
-//
-// This backend updates the entire list at once. This is not much, assuming
-// 64 bytes per boss entry, 200 bosses == 12KB per update == 12 KB/s,
-// which is tiny compared to how other programs write dozens and hundreds MB/s
-public class FileBackend<T>(string filePath) : IBackend where T : ICalculation
+public class FileBackend<T> : IBackend where T : ICalculation
 {
-    private record Head(string Type, JsonElement Items);
+    private const string DbDirName = "TerrariaGearQualityCalculator";
+    private string FilePath { get; }
 
-    private string FilePath { get; } = filePath;
+    private readonly JsonSerializerOptions _jsonOpts = new()
+        { NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals };
+
+    public FileBackend(string fileName)
+    {
+        var dirPath = string.Concat(Main.SavePath, Path.DirectorySeparatorChar, DbDirName);
+        if (!Directory.Exists(dirPath))
+            Directory.CreateDirectory(dirPath);
+
+        var dbPath = string.Concat(dirPath, Path.DirectorySeparatorChar, fileName);
+        FilePath = dbPath;
+    }
 
     public List<ICalculation> Load()
     {
-        if (!FileUtilities.Exists(FilePath, false))
+        if (!File.Exists(FilePath))
         {
-            Write([]);
-            return [];
+            var cc = Write([]);
+            return cc.Cast<ICalculation>().ToList();
         }
 
         // The file is not that big to read it async
-        var raw = FileUtilities.ReadAllBytes(FilePath, false);
-        // var listType = typeof(List<>).MakeGenericType(CalcType);
-        // JsonSerializer.Deserialize(raw, listType);
-        // var file = JsonSerializer.Deserialize<CalculationEntry>(raw)!;
-        List<T> list = [];
+        var raw = File.ReadAllBytes(FilePath);
+        List<T> list;
         try
         {
-            var file = JsonSerializer.Deserialize<Head>(raw)!;
-            list = JsonSerializer.Deserialize<List<T>>(file.Items.GetRawText())!;
-            // list = file.Items.Deserialize<List<T>>()!;
+            var file = JsonSerializer.Deserialize<Head>(raw, _jsonOpts)!;
+            list = JsonSerializer.Deserialize<List<T>>(file.Items.GetRawText(), _jsonOpts)!;
         }
         catch (Exception e)
         {
             var time = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var dst = $"{FilePath}.backup-${time}.json";
-            FileUtilities.Copy(FilePath, FilePath, false, true);
-            Write([]);
-            // TODO: find a way to log the error, for now chat will suffice
-            // var log = ModContent.GetInstance<TerrariaGearQualityCalculator>().Instance.Logger;
-            Main.NewText($"FileStorage.Load failed, the old file backed up to {dst}, the new file was created. {e}",
-                255, 0, 0);
+            File.Copy(FilePath, FilePath, true);
+            list = Write([]);
+            TGQC.Log.Warn($"Failed to load storage, the old file backed up to {dst}, the new file was created. {e}");
         }
 
         return list.Cast<ICalculation>().ToList();
@@ -57,10 +62,10 @@ public class FileBackend<T>(string filePath) : IBackend where T : ICalculation
 
     public void Store(List<ICalculation> calculations)
     {
-        if (!FileUtilities.Exists(FilePath, false))
+        if (!File.Exists(FilePath))
         {
             Write([]);
-            Main.NewText($"Called Save() before initialization for file {FilePath}", 128, 255, 0);
+            TGQC.Log.Info($"Called Store() before initialization for file {FilePath}");
             return;
         }
 
@@ -68,16 +73,28 @@ public class FileBackend<T>(string filePath) : IBackend where T : ICalculation
         Write(list);
     }
 
-    private void Write(List<T> calculations)
+    // Writes empty or filled calculations and returns them.
+    //
+    // This backend updates the entire list at once. This is not much, assuming
+    // 64 bytes per boss entry, 200 bosses == 12KB per update == 12 KB/s,
+    // which is tiny compared to how other programs write dozens and hundreds MB/s.
+    private List<T> Write(List<T> calculations)
     {
-        var items = new JsonElement();
-        if (calculations.Count > 0)
+        if (!TGQC.IsSingleplayer)
         {
-            items = JsonSerializer.SerializeToElement(calculations)!;
+            var stack = new StackTrace();
+            TGQC.Log.Warn($"Attempted to write calculations in multiplayer at: {stack}");
+            return calculations;
         }
 
+        if (calculations.Count == 0) calculations = Initializer.Init().Cast<T>().ToList();
+
+        var items = JsonSerializer.SerializeToElement(calculations, _jsonOpts)!;
         var head = new Head(typeof(T).FullName, items);
-        var rawHead = JsonSerializer.SerializeToUtf8Bytes(head);
-        FileUtilities.WriteAllBytes(FilePath, rawHead, false);
+        var rawHead = JsonSerializer.SerializeToUtf8Bytes(head, _jsonOpts);
+        File.WriteAllBytes(FilePath, rawHead);
+        return calculations;
     }
+
+    private record Head(string Type, JsonElement Items);
 }
