@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using Terraria;
-using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using TerrariaGearQualityCalculator.Storage;
@@ -43,13 +42,13 @@ internal class PlayerAssist : ModPlayer
     }
 
     // Track player deaths during boss fights.
-    public override void Kill(double damage, int hitDirection, bool pvp, PlayerDeathReason damageSource)
+    // BUG: known issue: when Nycro's NoHit or similar mod to interfere with death is enabled, the stats won't be correct
+    public override void UpdateDead()
     {
         if (Tracker.IsEmpty || Main.netMode != NetmodeID.SinglePlayer)
             return;
 
-        // this is problematic, as I could have died from fall or mob
-        var npcId = damageSource.SourceNPCIndex;
+        var npcId = Tracker.NpcId;
         NPC boss;
         try
         {
@@ -65,6 +64,7 @@ internal class PlayerAssist : ModPlayer
         }
 
         _storage.Save(Tracker.CalcTrivial(boss));
+        TGQC.Log.Debug($"Stored tracker of NPC id={Tracker.NpcId}: fightTicks={Tracker.FightTicks}");
         Tracker = new Tracker();
     }
 }

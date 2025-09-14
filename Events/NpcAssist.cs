@@ -20,9 +20,13 @@ internal class NpcAssist : GlobalNPC
 
         var player = Main.LocalPlayer.GetModPlayer<PlayerAssist>();
         if (!player.Tracker.IsEmpty)
-            TGQC.Log.Info("Another boss is already being tracked, ignoring new boss");
+            TGQC.Log.Info(
+                $"Another boss id={player.Tracker.NpcId} is already being tracked, ignoring new boss id={npc.netID} name={npc.TypeName}");
         else
+        {
+            TGQC.Log.Debug($"Started tracking of npc id={npc.netID} name={npc.TypeName}");
             player.Tracker = new Tracker(npc.netID);
+        }
     }
 
     // When an NPC is killed and fully inactive the fight has ended, stop tracker and save calculation
@@ -33,9 +37,13 @@ internal class NpcAssist : GlobalNPC
 
         var player = Main.LocalPlayer.GetModPlayer<PlayerAssist>();
         if (player.Tracker.NpcId != npc.netID)
+        {
+            TGQC.Log.Debug($"Killed NPC id={npc.netID}, but tracking NPC id={player.Tracker.NpcId}");
             return;
+        }
 
         Storage.Save(player.Tracker.CalcTrivial(npc));
+        TGQC.Log.Debug($"Stored tracker of NPC id={npc.netID}: fightTicks={player.Tracker.FightTicks}");
         player.Tracker = new Tracker();
     }
 }

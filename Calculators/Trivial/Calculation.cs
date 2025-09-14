@@ -17,8 +17,8 @@ internal class TrivialCalculation(int id)
         var fightTimeSec = fightTimeTicks / TicksPerSecond;
         Gear = new PlayerGear(player, weapons);
         BossRemainingHp = boss.life;
-        PlayerDps = (int)((boss.lifeMax - boss.life) / fightTimeSec);
-        BossTime = (decimal)boss.lifeMax / PlayerDps;
+        PlayerDps = fightTimeSec == 0 ? 0 : (int)((boss.lifeMax - boss.life) / fightTimeSec);
+        BossTime = PlayerDps == 0 ? 0 : (decimal)boss.lifeMax / PlayerDps;
 
         var prev = new PlayerHitEvent(player.statLifeMax, 0);
         decimal dps = 0;

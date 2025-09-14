@@ -18,6 +18,7 @@ internal sealed class TerrariaGearQualityCalculator : Mod
     {
         if (Main.netMode != NetmodeID.SinglePlayer)
         {
+            // TODO: we should allow access to your data in multiplayer, but not track anything
             Logger.Error("TerrariaGearQualityCalculator is not supported in multiplayer!");
             return;
         }

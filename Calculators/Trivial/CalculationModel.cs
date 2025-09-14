@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Linq;
 using Terraria.ID;
 using Terraria.Localization;
 
@@ -7,7 +8,8 @@ namespace TerrariaGearQualityCalculator.Calculators.Trivial;
 
 internal class CalculationModel : ICalculationModelWritable
 {
-    // TODO: test this on language change when we add russian localization, I assume it will break
+    // Strangely enough, this works on language switch in main menu,
+    // which means that static classes of the mod are loaded upon entering a world
     static CalculationModel()
     {
         // preserve this order in values
@@ -60,6 +62,13 @@ internal class CalculationModel : ICalculationModelWritable
             $"{calc.Gear.Helmet}, {calc.Gear.Chest}, {calc.Gear.Legs}",
             string.Join(", ", calc.Gear.Accessories)
         ];
+    }
+
+    // ToString is used for debugging and may be not updated with latest changes
+    public override string ToString()
+    {
+        var details = string.Join(", ", DetailsAttributes.Zip(DetailsValues, (attr, value) => $"{attr}: {value}"));
+        return $"Name=${Name} DetailsValues={details}";
     }
 
     private static string FormatFixed(decimal value, int digits = 0)

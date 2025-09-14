@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TerrariaGearQualityCalculator.Calculators;
+using TGQC = TerrariaGearQualityCalculator.TerrariaGearQualityCalculator;
 
 namespace TerrariaGearQualityCalculator.Storage;
 
@@ -23,6 +24,7 @@ public class ModelStorage : MemoryStorage, IModelStorage
         else
             Models[i].Update(boss);
 
+        TGQC.Log.Debug($"Saved calc: {boss.ToModel()}");
         return i;
     }
 }
