@@ -5,20 +5,21 @@ using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using TerrariaGearQualityCalculator.Storage;
+using TGQC = TerrariaGearQualityCalculator.TerrariaGearQualityCalculator;
 
 namespace TerrariaGearQualityCalculator.Events;
 
 // Reused thanks to https://github.com/JavidPack/BossChecklist
 internal class PlayerAssist : ModPlayer
 {
-    private readonly ModelStorage _storage = State.Instance.Storage;
+    private readonly ModelStorage _storage = TGQC.Storage;
 
     // Tracker tracks stats only per one boss at the same times
     internal Tracker Tracker { get; set; } = new();
 
     public override void PreUpdate()
     {
-        if (Tracker.IsEmpty || Main.netMode is not NetmodeID.SinglePlayer)
+        if (Tracker.IsEmpty || Main.netMode != NetmodeID.SinglePlayer)
             return;
 
         var held = Player.HeldItem;
@@ -34,7 +35,7 @@ internal class PlayerAssist : ModPlayer
     // The calculator is designed the way to consider all hits.
     public override void OnHurt(Player.HurtInfo info)
     {
-        if (Tracker.IsEmpty)
+        if (Tracker.IsEmpty || Main.netMode != NetmodeID.SinglePlayer)
             return;
 
         var player = Main.LocalPlayer.GetModPlayer<PlayerAssist>();
@@ -44,7 +45,7 @@ internal class PlayerAssist : ModPlayer
     // Track player deaths during boss fights.
     public override void Kill(double damage, int hitDirection, bool pvp, PlayerDeathReason damageSource)
     {
-        if (Tracker.IsEmpty)
+        if (Tracker.IsEmpty || Main.netMode != NetmodeID.SinglePlayer)
             return;
 
         // this is problematic, as I could have died from fall or mob
@@ -59,7 +60,7 @@ internal class PlayerAssist : ModPlayer
             // FIXME possible workaround: track last known boss health on every hit (fix only when it actually happens)
             // This will require either introducing new MockNPC class, or adding a couple of constructors with raw values
             // One more option is to track the boss entry itself, so it won't be garbage-collected
-            Logger.Error($"NPC id={npcId} has despawned, was not found or is not a boss");
+            TGQC.Log.Error($"NPC id={npcId} has despawned, was not found or is not a boss");
             return;
         }
 

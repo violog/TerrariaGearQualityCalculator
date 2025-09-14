@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Terraria;
 using Terraria.GameInput;
-using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace TerrariaGearQualityCalculator.Content.UI.Calculator
@@ -15,7 +11,7 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator
 
         public override void ProcessTriggers(TriggersSet triggersSet)
         {
-            if (TerrariaGearQualityCalculator.CalculatorHotKey.JustPressed)
+            if (TerrariaGearQualityCalculator.CalculatorHotKey.JustPressed && Main.netMode == NetmodeID.SinglePlayer)
             {
                 ModContent.GetInstance<CalculatorUISystem>().ChangeDisplayUI(IsCalculatorOpen);
 

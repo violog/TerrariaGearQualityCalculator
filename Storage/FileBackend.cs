@@ -6,6 +6,7 @@ using System.Text.Json;
 using Terraria;
 using TerrariaGearQualityCalculator.Calculators;
 using TerrariaGearQualityCalculator.Calculators.Trivial;
+using TGQC = TerrariaGearQualityCalculator.TerrariaGearQualityCalculator;
 
 namespace TerrariaGearQualityCalculator.Storage;
 
@@ -48,7 +49,7 @@ public class FileBackend<T> : IBackend where T : ICalculation
             var dst = $"{FilePath}.backup-${time}.json";
             File.Copy(FilePath, FilePath, true);
             list = Write([]);
-            Logger.Warn($"Failed to load storage, the old file backed up to {dst}, the new file was created. {e}");
+            TGQC.Log.Warn($"Failed to load storage, the old file backed up to {dst}, the new file was created. {e}");
         }
 
         return list.Cast<ICalculation>().ToList();
@@ -59,7 +60,7 @@ public class FileBackend<T> : IBackend where T : ICalculation
         if (!File.Exists(FilePath))
         {
             Write([]);
-            Logger.Info($"Called Store() before initialization for file {FilePath}");
+            TGQC.Log.Info($"Called Store() before initialization for file {FilePath}");
             return;
         }
 

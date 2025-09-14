@@ -3,34 +3,35 @@ using Terraria;
 
 namespace TerrariaGearQualityCalculator;
 
-internal static class Logger
+// Log wraps Mod.Logger to format messages and log in chat on need
+internal class Log
 {
     private const int Level = 4;
     private const bool ChatEnabled = true;
-    private static readonly ILog Log = LogManager.GetLogger("TerrariaGearQualityCalculator");
+    private readonly ILog _log = LogManager.GetLogger("TerrariaGearQualityCalculator");
 
-    internal static void Debug(string message)
+    internal void Debug(string message)
     {
-        Log.Debug(message);
+        _log.Debug(message);
         WriteInChat(message, 4, 175, 175, 175);
     }
 
-    internal static void Info(string message)
+    internal void Info(string message)
     {
-        Log.Info(message);
+        _log.Info(message);
         WriteInChat(message, 3, 255, 255, 255);
     }
 
-    internal static void Warn(string message)
+    internal void Warn(string message)
     {
-        Log.Warn(message);
+        _log.Warn(message);
         WriteInChat(message, 2, 255, 243, 63);
     }
 
-    internal static void Error(string message)
+    internal void Error(string message)
     {
         WriteInChat(message, 2, 255, 58, 58);
-        Log.Error(message);
+        _log.Error(message);
     }
 
     private static void WriteInChat(string message, int level, byte r, byte g, byte b)
