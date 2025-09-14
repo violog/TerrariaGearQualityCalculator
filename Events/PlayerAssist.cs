@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using Terraria;
-using Terraria.ID;
 using Terraria.ModLoader;
 using TerrariaGearQualityCalculator.Storage;
 using TGQC = TerrariaGearQualityCalculator.TerrariaGearQualityCalculator;
@@ -18,7 +17,7 @@ internal class PlayerAssist : ModPlayer
 
     public override void PreUpdate()
     {
-        if (Tracker.IsEmpty || Main.netMode != NetmodeID.SinglePlayer)
+        if (TGQC.IsSingleplayer || Tracker.IsEmpty)
             return;
 
         var held = Player.HeldItem;
@@ -34,7 +33,7 @@ internal class PlayerAssist : ModPlayer
     // The calculator is designed the way to consider all hits.
     public override void OnHurt(Player.HurtInfo info)
     {
-        if (Tracker.IsEmpty || Main.netMode != NetmodeID.SinglePlayer)
+        if (TGQC.IsSingleplayer || Tracker.IsEmpty)
             return;
 
         var player = Main.LocalPlayer.GetModPlayer<PlayerAssist>();
@@ -42,12 +41,11 @@ internal class PlayerAssist : ModPlayer
     }
 
     // Track player deaths during boss fights.
-    // BUG: known issue: when Nycro's NoHit or similar mod to interfere with death is enabled, the stats won't be correct
-    // also, BossRemainingHp is 0 on dead, which isn't right - try fixing with PreKill override;
-    // also, see DB - invalid too big numbers are stored if you divide INF/5.0 e.g., INF must be preserved, try built-in INF
+    // BUG: when Nycro's NoHit or similar mod to interfere with death hooks is enabled, the stats won't be correct.
+    // For example, BossRemainingHp is 0, and fatal hit is not recorded when die-on-hit setting is enabled
     public override void UpdateDead()
     {
-        if (Tracker.IsEmpty || Main.netMode != NetmodeID.SinglePlayer)
+        if (TGQC.IsSingleplayer || Tracker.IsEmpty)
             return;
 
         var npcId = Tracker.NpcId;
@@ -58,9 +56,10 @@ internal class PlayerAssist : ModPlayer
         }
         catch (InvalidOperationException)
         {
-            // FIXME possible workaround: track last known boss health on every hit (fix only when it actually happens)
-            // This will require either introducing new MockNPC class, or adding a couple of constructors with raw values
-            // One more option is to track the boss entry itself, so it won't be garbage-collected
+            // Possible workaround: track last known boss health on every hit (fix only when it actually happens)
+            // This will require either introducing new MockNPC class, or adding a couple of constructors with raw values.
+            // One more option is to track the boss entry itself, so it won't be garbage-collected.
+            // Due to Nycro's NoHit interference issue, the best option would be to track boss health separately.
             TGQC.Log.Error($"NPC id={npcId} has despawned, was not found or is not a boss");
             return;
         }

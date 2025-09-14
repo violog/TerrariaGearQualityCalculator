@@ -20,8 +20,6 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator
 
         public override void Load()
         {
-            if (Main.netMode != NetmodeID.SinglePlayer) return;
-
             CalculatorInterface = new UserInterface();
 
             CalculatorUi = new CalculatorUI();

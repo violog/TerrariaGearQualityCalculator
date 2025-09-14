@@ -14,17 +14,22 @@ internal sealed class TerrariaGearQualityCalculator : Mod
     internal static Log Log { get; private set; }
     internal static ModelStorage Storage { get; private set; }
 
+    // The calculator only works correctly for singleplayer, which means,
+    // no calculations must be modified in multiplayer -- read-only access.
+    internal static readonly bool IsSingleplayer = Main.netMode == NetmodeID.SinglePlayer;
+
     public override void Load()
     {
-        if (Main.netMode != NetmodeID.SinglePlayer)
+        if (!IsSingleplayer)
         {
-            // TODO: we should allow access to your data in multiplayer, but not track anything
-            Logger.Error("TerrariaGearQualityCalculator is not supported in multiplayer!");
+            Log = new Log(true, 2);
+            Log.Warn(
+                "Calculator will be opened read-only in multiplayer. You can view stats, but boss fight data will not be updated.");
             return;
         }
 
         CalculatorHotKey = KeybindLoader.RegisterKeybind(this, "GearQualityCalculator", "P");
-        Log = new Log();
+        Log = new Log(true); // make configurable?
         var backend = new FileBackend<TrivialCalculation>(StorageFileName);
         Storage = new ModelStorage(backend);
     }

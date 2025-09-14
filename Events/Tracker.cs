@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Terraria;
 using TerrariaGearQualityCalculator.Calculators.Trivial;
+using TGQC = TerrariaGearQualityCalculator.TerrariaGearQualityCalculator;
 
 namespace TerrariaGearQualityCalculator.Events;
 
@@ -14,6 +15,8 @@ public class Tracker(int npcId = 0)
 
     internal TrivialCalculation CalcTrivial(NPC boss)
     {
-        return new TrivialCalculation(Main.LocalPlayer, boss, FightTicks, Hits, Weapons);
+        return !TGQC.IsSingleplayer
+            ? null
+            : new TrivialCalculation(Main.LocalPlayer, boss, FightTicks, Hits, Weapons);
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -79,6 +80,13 @@ public class FileBackend<T> : IBackend where T : ICalculation
     // which is tiny compared to how other programs write dozens and hundreds MB/s.
     private List<T> Write(List<T> calculations)
     {
+        if (!TGQC.IsSingleplayer)
+        {
+            var stack = new StackTrace();
+            TGQC.Log.Warn($"Attempted to write calculations in multiplayer at: {stack}");
+            return calculations;
+        }
+
         if (calculations.Count == 0) calculations = Initializer.Init().Cast<T>().ToList();
 
         var items = JsonSerializer.SerializeToElement(calculations, _jsonOpts)!;

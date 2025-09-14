@@ -1,6 +1,5 @@
 using Terraria;
 using Terraria.DataStructures;
-using Terraria.ID;
 using Terraria.ModLoader;
 using TerrariaGearQualityCalculator.Storage;
 using TGQC = TerrariaGearQualityCalculator.TerrariaGearQualityCalculator;
@@ -15,7 +14,7 @@ internal class NpcAssist : GlobalNPC
     // When a boss spawns, set up the player tracker for the upcoming fight.
     public override void OnSpawn(NPC npc, IEntitySource source)
     {
-        if (!npc.boss || Main.netMode != NetmodeID.SinglePlayer)
+        if (!TGQC.IsSingleplayer || !npc.boss)
             return;
 
         var player = Main.LocalPlayer.GetModPlayer<PlayerAssist>();
@@ -32,7 +31,7 @@ internal class NpcAssist : GlobalNPC
     // When an NPC is killed and fully inactive the fight has ended, stop tracker and save calculation
     public override void OnKill(NPC npc)
     {
-        if (!npc.boss || Main.netMode != NetmodeID.SinglePlayer)
+        if (!TGQC.IsSingleplayer || !npc.boss)
             return;
 
         var player = Main.LocalPlayer.GetModPlayer<PlayerAssist>();

@@ -18,6 +18,8 @@ public class ModelStorage : MemoryStorage, IModelStorage
 
     public override int Save(ICalculation boss)
     {
+        if (!TGQC.IsSingleplayer) return 0;
+
         var i = base.Save(boss);
         if (Calculations.Count > Models.Count)
             Models.Add(boss.ToModel());
