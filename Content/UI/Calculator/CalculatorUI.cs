@@ -19,11 +19,11 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator
     {
         private UIPanel _formUi;
 
-        private int _formPadding = 10;
+        private readonly int _formPadding = 10;
 
-        private int _formWidth = 600;   
+        private readonly int _formWidth = 600;   
 
-        private int _formHeight = 300;
+        private readonly int _formHeight = 300;
 
         private SearchUI _searchUi;
 
@@ -36,7 +36,7 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator
             LoadElements();
         }
 
-        public void CreateForm()
+        private void CreateForm()
         {
             _formUi = new UIPanel();
 
@@ -49,14 +49,14 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator
             Append(_formUi);
         }
 
-        public void LoadElements()
+        private void LoadElements()
         {
             LoadSearch();
 
             LoadBossList();
         }
 
-        public void LoadSearch()
+        private void LoadSearch()
         {
             _searchUi = new SearchUI();
 
@@ -66,7 +66,7 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator
             _formUi.Append(_searchUi);
         }
 
-        public void LoadBossList()
+        private void LoadBossList()
         {
             _bossListUi = new BossListUI();
 
@@ -79,6 +79,13 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator
 
         public override void Update(GameTime gameTime)
         {
+            if (_searchUi.NeedSearch())
+            {
+                _bossListUi.UpdateBossListUi(_searchUi.Text);
+                
+                _searchUi.ResetSearch();
+            }
+            
             base.Update(gameTime);
         }
 

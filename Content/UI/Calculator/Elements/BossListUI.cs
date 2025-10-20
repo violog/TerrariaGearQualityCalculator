@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 using TerrariaGearQualityCalculator.Content.UI.Calculator.Elements.Part;
@@ -15,13 +16,13 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements
 {
     internal class BossListUI : UIPanel
     {
-        private UIList _bossListUi;
+        private UIList _bossListUi = null;
 
-        private UIScrollbar _scrollbarUi;
+        private UIScrollbar _scrollbarUi = null;
 
         private const float _heightRow = 30f;
-
-        private List<string> _bossList = new List<string>()
+        
+        private List<string> _bossData = new List<string>()
         {
             "King Slime",
             "Eye of Cthulhu",
@@ -40,6 +41,8 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements
             "Lunatic Cultist",
             "Moon Lord"
         };
+
+        private List<string> _bossList;
 
         public override void OnInitialize()
         {
@@ -63,9 +66,9 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements
             Append(_scrollbarUi);
         }
 
-        public void UpdateBossListUi(string search = "")
+        public void UpdateBossListUi(string search = null)
         {
-            // _bossList = get...
+            _bossList = GetBossList(search);
 
             LoadBosses();
 
@@ -103,8 +106,26 @@ namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements
                     row = Grid.CreateRow(_heightRow);
                 }
             }
-
+            
+            if (countElementsInRow > 0)
+            {
+                _bossListUi.Add(row);
+            }
+            
+            _bossListUi.UpdateOrder();
             _bossListUi.Recalculate();
+        }
+
+        private List<string> GetBossList(string search = null)
+        {
+            if (!string.IsNullOrEmpty(search))
+            {
+                return _bossData
+                    .Where(word => word.Contains(search, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+            
+            return _bossData;
         }
 
         public override void Update(GameTime gameTime)
