@@ -17,7 +17,6 @@ namespace TerrariaGearQualityCalculator.Storage;
 public class FileBackend<T> : IBackend where T : ICalculation
 {
     private const string DbDirName = "TerrariaGearQualityCalculator";
-    private string FilePath { get; }
 
     private readonly JsonSerializerOptions _jsonOpts = new()
         { NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals };
@@ -31,6 +30,8 @@ public class FileBackend<T> : IBackend where T : ICalculation
         var dbPath = string.Concat(dirPath, Path.DirectorySeparatorChar, fileName);
         FilePath = dbPath;
     }
+
+    private string FilePath { get; }
 
     public List<ICalculation> Load()
     {

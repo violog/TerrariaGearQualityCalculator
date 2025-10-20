@@ -20,8 +20,10 @@ internal class NpcAssist : GlobalNPC
 
         var player = Main.LocalPlayer.GetModPlayer<PlayerAssist>();
         if (!player.Tracker.IsEmpty)
+        {
             TGQC.Log.Info(
                 $"Another boss id={player.Tracker.NpcId} is already being tracked, ignoring new boss id={npc.netID} name={npc.TypeName}");
+        }
         else
         {
             TGQC.Log.Debug($"Started tracking of npc id={npc.netID} name={npc.TypeName}");

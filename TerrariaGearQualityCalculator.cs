@@ -11,12 +11,12 @@ internal sealed class TerrariaGearQualityCalculator : Mod
     private const string StorageFileName = "TrivialCalculation.json";
 
     internal static ModKeybind CalculatorHotKey;
-    internal static Log Log { get; private set; }
-    internal static ModelStorage Storage { get; private set; }
 
     // The calculator only works correctly for singleplayer, which means,
     // no calculations must be modified in multiplayer -- read-only access.
     internal static readonly bool IsSingleplayer = Main.netMode == NetmodeID.SinglePlayer;
+    internal static Log Log { get; private set; }
+    internal static ModelStorage Storage { get; private set; }
 
     public override void Load()
     {

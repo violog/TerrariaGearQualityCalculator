@@ -1,91 +1,77 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
-using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
 using TerrariaGearQualityCalculator.Calculators;
 
-namespace TerrariaGearQualityCalculator.Content.UI.Calculator
+namespace TerrariaGearQualityCalculator.Content.UI.Calculator;
+
+public class CalculatorUISystem : ModSystem
 {
-    public class CalculatorUISystem : ModSystem
+    private GameTime _lastUpdateUiGameTime;
+
+    internal UserInterface CalculatorInterface;
+
+    internal CalculatorUI CalculatorUi;
+    internal IModelStorage Storage = TerrariaGearQualityCalculator.Storage;
+
+    public override void Load()
     {
-        internal IModelStorage Storage = TerrariaGearQualityCalculator.Storage;
+        CalculatorInterface = new UserInterface();
 
-        internal UserInterface CalculatorInterface;
+        CalculatorUi = new CalculatorUI();
 
-        internal CalculatorUI CalculatorUi;
+        CalculatorUi.Activate();
+    }
 
-        private GameTime _lastUpdateUiGameTime;
+    public override void UpdateUI(GameTime gameTime)
+    {
+        _lastUpdateUiGameTime = gameTime;
 
-        public override void Load()
-        {
-            CalculatorInterface = new UserInterface();
+        if (CalculatorInterface?.CurrentState != null) CalculatorInterface.Update(gameTime);
+    }
 
-            CalculatorUi = new CalculatorUI();
+    public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
+    {
+        var mouseTextIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Mouse Text"));
 
-            CalculatorUi.Activate();
-        }
+        if (mouseTextIndex != -1)
+            layers.Insert(mouseTextIndex, new LegacyGameInterfaceLayer(
+                "TerrariaGearQualityCalculator: TerrariaGearQualityCalculatorInterface",
+                delegate
+                {
+                    if (_lastUpdateUiGameTime != null && CalculatorInterface?.CurrentState != null)
+                        CalculatorInterface.Draw(Main.spriteBatch, _lastUpdateUiGameTime);
 
-        public override void UpdateUI(GameTime gameTime)
-        {
-            _lastUpdateUiGameTime = gameTime;
+                    return true;
+                },
+                InterfaceScaleType.UI));
+    }
 
-            if (CalculatorInterface?.CurrentState != null)
-            {
-                CalculatorInterface.Update(gameTime);
-            }
-        }
+    public void ChangeDisplayUI(bool isOpen = false)
+    {
+        if (isOpen)
+            HideUI();
+        else
+            ShowUI();
+    }
 
-        public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
-        {
-            int mouseTextIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Mouse Text"));
+    public void ShowUI()
+    {
+        CalculatorInterface?.SetState(CalculatorUi);
+    }
 
-            if (mouseTextIndex != -1)
-            {
-                layers.Insert(mouseTextIndex, new LegacyGameInterfaceLayer(
-                    "TerrariaGearQualityCalculator: TerrariaGearQualityCalculatorInterface",
-                    delegate
-                    {
-                        if (_lastUpdateUiGameTime != null && CalculatorInterface?.CurrentState != null)
-                        {
-                            CalculatorInterface.Draw(Main.spriteBatch, _lastUpdateUiGameTime);
-                        }
+    public void HideUI()
+    {
+        CalculatorInterface?.SetState(null);
+    }
 
-                        return true;
-                    },
-                    InterfaceScaleType.UI));
-            }
-        }
-
-        public void ChangeDisplayUI(bool isOpen = false)
-        {
-            if (isOpen)
-            {
-                HideUI();
-            }
-            else
-            {
-                ShowUI();
-            }
-        }
-
-        public void ShowUI()
-        {
-            CalculatorInterface?.SetState(CalculatorUi);
-        }
-
-        public void HideUI()
-        {
-            CalculatorInterface?.SetState(null);
-        }
-
-        public override void Unload()
-        {
-            Storage = null;
-            CalculatorInterface = null;
-            CalculatorUi = null;
-            _lastUpdateUiGameTime = null;
-        }
+    public override void Unload()
+    {
+        Storage = null;
+        CalculatorInterface = null;
+        CalculatorUi = null;
+        _lastUpdateUiGameTime = null;
     }
 }

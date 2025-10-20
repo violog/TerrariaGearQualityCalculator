@@ -1,54 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Terraria;
-using Terraria.GameContent.UI.Elements;
-using Terraria.ModLoader;
+﻿using Terraria.GameContent.UI.Elements;
 
-namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements.Part
+namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements.Part;
+
+internal class BossPreviewUI : UIPanel
 {
-    internal class BossPreviewUI : UIPanel
+    private readonly string _bossData;
+    private readonly float _height;
+
+    private readonly bool _isRight;
+
+    public BossPreviewUI(float height, string bossData, bool isRight)
     {
-        private readonly float _height;
+        _height = height;
+        _bossData = bossData;
+        _isRight = isRight;
 
-        private readonly string _bossData;
+        Width.Set(0, 0.48f);
+        Height.Set(_height, 0f);
+        HAlign = 0f;
 
-        private readonly bool _isRight = false;
+        if (_isRight) HAlign = 0.95f;
 
-        public BossPreviewUI(float height, string bossData, bool isRight)
-        {
-            _height = height;
-            _bossData = bossData;
-            _isRight = isRight;
-            
-            Width.Set(0, 0.48f);
-            Height.Set(_height, 0f);
-            HAlign = 0f;
+        LoadElements();
+    }
 
-            if (_isRight)
-            {
-                HAlign = 0.95f;
-            }
+    private void LoadElements()
+    {
+        var bossNameUi = new UIText(_bossData);
 
-            LoadElements();
-        }
+        bossNameUi.HAlign = 0f;
+        bossNameUi.VAlign = 0.5f;
 
-        private void LoadElements()
-        {
-            UIText bossNameUi = new UIText(_bossData, 1f);
+        var bossValueUi = new UIText("0.199");
 
-            bossNameUi.HAlign = 0f;
-            bossNameUi.VAlign = 0.5f;
+        bossValueUi.HAlign = 1f;
+        bossValueUi.VAlign = 0.5f;
 
-            UIText bossValueUi = new UIText("0.199", 1f);
-
-            bossValueUi.HAlign = 1f;
-            bossValueUi.VAlign = 0.5f;
-
-            Append(bossNameUi);
-            Append(bossValueUi);
-        }
+        Append(bossNameUi);
+        Append(bossValueUi);
     }
 }
