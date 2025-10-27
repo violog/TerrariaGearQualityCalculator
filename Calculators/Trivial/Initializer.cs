@@ -9,6 +9,7 @@ internal static class Initializer
     {
         var result = new List<ICalculation>(50);
 
+        // TODO: The Twins are 2 separate boss entries; also The Torch God, Moon Lord's parts got into entries, despite not being bosses
         foreach (var pair in ContentSamples.NpcsByNetId)
         {
             var npc = pair.Value;

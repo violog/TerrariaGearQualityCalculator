@@ -5,36 +5,16 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
+using TerrariaGearQualityCalculator.Calculators;
 using TerrariaGearQualityCalculator.Content.UI.Calculator.Elements.Part;
 using TerrariaGearQualityCalculator.Tools.UI;
+using TGQC = TerrariaGearQualityCalculator.TerrariaGearQualityCalculator;
 
 namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements;
 
 internal class BossListUI : UIPanel
 {
-    private const float _heightRow = 30f;
-
-    private readonly List<string> _bossData = new()
-    {
-        "King Slime",
-        "Eye of Cthulhu",
-        "Eater of Worlds",
-        "Brain of Cthulhu",
-        "Queen Bee",
-        "Skeletron",
-        "Deerclops",
-        "Wall of Flesh",
-        "The Twins",
-        "The Destroyer",
-        "Skeletron Prime",
-        "Plantera",
-        "Golem",
-        "Duke Fishron",
-        "Lunatic Cultist",
-        "Moon Lord"
-    };
-
-    private List<string> _bossList;
+    private List<ICalculationModel> _bossList;
     private UIList _bossListUi;
 
     private UIScrollbar _scrollbarUi;
@@ -55,15 +35,16 @@ internal class BossListUI : UIPanel
 
         _bossListUi.SetScrollbar(_scrollbarUi);
 
-        UpdateBossListUi();
-
         Append(_bossListUi);
         Append(_scrollbarUi);
     }
 
-    public void UpdateBossListUi(string search = null)
+    // Must run after OnInitialize to avoid NullReferenceException
+    public override void OnActivate() => Update();
+
+    internal void Update(string search = null)
     {
-        _bossList = GetBossList(search);
+        _bossList = FilterList(search);
 
         LoadBosses();
 
@@ -75,17 +56,14 @@ internal class BossListUI : UIPanel
     private void LoadBosses()
     {
         _bossListUi.Clear();
-
         var isRight = false;
-
         var countElementsInRow = 0;
-
-        var row = Grid.CreateRow(_heightRow);
+        var row = Grid.CreateRow();
 
         // Create a row for every 2 elements
         foreach (var boss in _bossList)
         {
-            UIPanel bossPreviewUI = new BossPreviewUI(_heightRow, boss, isRight);
+            UIPanel bossPreviewUI = new BossPreviewUI(boss.Name, boss.Sr, isRight);
 
             row.Append(bossPreviewUI);
 
@@ -98,7 +76,7 @@ internal class BossListUI : UIPanel
                 _bossListUi.Add(row);
 
                 countElementsInRow = 0;
-                row = Grid.CreateRow(_heightRow);
+                row = Grid.CreateRow();
             }
         }
 
@@ -108,14 +86,23 @@ internal class BossListUI : UIPanel
         _bossListUi.Recalculate();
     }
 
-    private List<string> GetBossList(string search = null)
+    private static List<ICalculationModel> FilterList(string search = null)
     {
-        if (!string.IsNullOrEmpty(search))
-            return _bossData
-                .Where(word => word.Contains(search, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+        TGQC.Log.Info(
+            $"Contains {TGQC.Storage.BossList.Count} bosses, search: {search}. Values:");
+        foreach (var boss in TGQC.Storage.BossList)
+        {
+            TGQC.Log.Debug(boss.ToString());
+        }
 
-        return _bossData;
+        if (!string.IsNullOrEmpty(search))
+        {
+            return TGQC.Storage.BossList
+                .Where(boss => boss != null && boss.Name.Contains(search, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        return TGQC.Storage.BossList.ToList();
     }
 
     public override void Update(GameTime gameTime)
@@ -124,10 +111,5 @@ internal class BossListUI : UIPanel
 
         _bossListUi.Update(gameTime);
         _scrollbarUi.Update(gameTime);
-    }
-
-    protected override void DrawSelf(SpriteBatch spriteBatch)
-    {
-        base.DrawSelf(spriteBatch);
     }
 }

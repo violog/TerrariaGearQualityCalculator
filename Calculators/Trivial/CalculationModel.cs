@@ -39,14 +39,16 @@ internal class CalculationModel : ICalculationModelWritable
             npc = modNpc.NPC;
         }
 
+        _id = calculation.Id;
         Name = npc.FullName;
         Update(calculation);
     }
 
     private static LocalizedText[] StaticDetailsAttributes { get; }
+    private readonly int _id;
 
     public string Name { get; }
-    public double Sr { get; private set; }
+    public string Sr { get; private set; }
 
     public LocalizedText[] DetailsAttributes => StaticDetailsAttributes;
 
@@ -54,11 +56,11 @@ internal class CalculationModel : ICalculationModelWritable
 
     public void Update(ICalculation calculation)
     {
-        Sr = calculation.Sr;
+        Sr = FormatFixed(calculation.Sr, 3);
         var calc = (TrivialCalculation)calculation;
         DetailsValues =
         [
-            FormatFixed(Sr, 3),
+            Sr,
             FormatFixed(calc.PlayerTime, 3),
             FormatFixed(calc.BossTime, 3),
             FormatFixed(calc.PlayerDps),
@@ -74,7 +76,7 @@ internal class CalculationModel : ICalculationModelWritable
     public override string ToString()
     {
         var details = string.Join(", ", DetailsAttributes.Zip(DetailsValues, (attr, value) => $"{attr}: {value}"));
-        return $"Name=${Name} DetailsValues={details}";
+        return $"Id={_id} Name={Name} Details={details}";
     }
 
     private static string FormatFixed(double value, int digits = 0)

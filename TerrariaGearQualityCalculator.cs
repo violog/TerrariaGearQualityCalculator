@@ -1,5 +1,6 @@
 using Terraria;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using TerrariaGearQualityCalculator.Calculators.Trivial;
 using TerrariaGearQualityCalculator.Storage;

@@ -58,6 +58,7 @@ public class FileBackend<T> : IBackend where T : ICalculation
             TGQC.Log.Warn($"Failed to load storage, the old file backed up to {dst}, the new file was created. {e}");
         }
 
+        TGQC.Log.Info($"Loaded {list.Count} items by FileBackend");
         return list.Cast<ICalculation>().ToList();
     }
 
@@ -71,6 +72,7 @@ public class FileBackend<T> : IBackend where T : ICalculation
         }
 
         var list = calculations.Cast<T>().ToList();
+        TGQC.Log.Debug($"Stored new list with {list.Count} items by FileBackend");
         Write(list);
     }
 

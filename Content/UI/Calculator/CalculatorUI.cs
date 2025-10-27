@@ -72,8 +72,7 @@ public class CalculatorUI : UIState
     {
         if (_searchUi.NeedSearch())
         {
-            _bossListUi.UpdateBossListUi(_searchUi.Text);
-
+            _bossListUi.Update(_searchUi.Text);
             _searchUi.ResetSearch();
         }
 
@@ -86,11 +85,15 @@ public class CalculatorUI : UIState
 
         // Preventing mouse clicks from using selected item
         if (_formUi.ContainsPoint(Main.MouseScreen)) Main.LocalPlayer.mouseInterface = true;
+    }
 
-        // Preventing scroll wheel from shifting selected Hotbar item
-        //if (list.IsMouseHovering)
-        //{
-        //    PlayerInput.LockVanillaMouseScroll("MyMod/ScrollListB");
-        //}
+    public override void OnActivate()
+    {
+        _bossListUi.Activate();
+    }
+
+    public override void OnDeactivate()
+    {
+        _searchUi.OnDeactivate();
     }
 }

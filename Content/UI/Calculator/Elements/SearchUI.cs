@@ -5,6 +5,7 @@ using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.GameInput;
 using Terraria.UI;
+using TGQC = TerrariaGearQualityCalculator.TerrariaGearQualityCalculator;
 
 namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements;
 
@@ -12,12 +13,11 @@ internal class SearchUI : UIElement
 {
     private bool _isFocused;
     private UITextBox _searchUi;
+    private string _oldText = "";
 
-    private string OldText = "";
+    internal string Text => _searchUi == null || _searchUi.Text == Placeholder ? "" : _searchUi.Text;
 
-    public string Text => _searchUi.Text;
-
-    public string Placeholder { get; } = "Search...";
+    private string Placeholder = "Search...";
 
     public override void OnInitialize()
     {
@@ -25,48 +25,42 @@ internal class SearchUI : UIElement
         {
             Width = StyleDimension.Fill,
             Height = StyleDimension.Fill,
-            TextHAlign = 0f
+            TextHAlign = 0f,
         };
 
         _searchUi.SetTextMaxLength(50);
-
-        _searchUi.OnLeftClick += (evt, element) =>
-        {
-            if (_searchUi.Text == Placeholder) _searchUi.SetText("");
-
-            Focus();
-        };
-
+        _searchUi.OnLeftClick += (_, _) => { SetFocus(true); };
         Append(_searchUi);
+        SetFocus(false);
     }
 
     public bool NeedSearch()
     {
-        if ((_searchUi.Text == Placeholder && !_isFocused) || OldText.Equals(_searchUi.Text)) return false;
-
-        return true;
+        return _searchUi.Text != Placeholder && _isFocused && !_oldText.Equals(_searchUi.Text);
     }
 
     public void ResetSearch()
     {
-        OldText = _searchUi.Text;
+        _oldText = _searchUi.Text;
     }
 
-    private void Focus()
+    private void SetFocus(bool v)
     {
-        if (_isFocused) return;
+        if (v)
+        {
+            Main.clrInput();
+            _searchUi.SetText("");
+            _searchUi.TextColor = Color.White;
+        }
+        else
+        {
+            if (Text == "") _searchUi.SetText(Placeholder);
+            _searchUi.TextColor = Color.Gray;
+        }
 
-        Main.clrInput();
-        _isFocused = true;
-        Main.blockInput = true;
-    }
-
-    private void Unfocus()
-    {
-        if (!_isFocused) return;
-
-        _isFocused = false;
-        Main.blockInput = false;
+        _isFocused = v;
+        _searchUi.ShowInputTicker = v;
+        Main.blockInput = v;
     }
 
     private static bool JustPressed(Keys key)
@@ -80,9 +74,7 @@ internal class SearchUI : UIElement
 
         if (!ContainsPoint(MousePosition) && (Main.mouseLeft || Main.mouseRight))
         {
-            if (string.IsNullOrEmpty(_searchUi.Text)) _searchUi.SetText(Placeholder);
-
-            Unfocus();
+            SetFocus(false);
         }
 
         base.Update(gameTime);
@@ -92,21 +84,25 @@ internal class SearchUI : UIElement
     {
         base.DrawSelf(spriteBatch);
 
-        if (_isFocused)
+        if (!_isFocused) return;
+
+        // must run every tick, just like DrawSelf does
+        PlayerInput.WritingText = true;
+        Main.instance.HandleIME();
+        var newText = Main.GetInputText(_searchUi.Text);
+
+        if (!newText.Equals(_searchUi.Text)) _searchUi.SetText(newText);
+
+        if (JustPressed(Keys.Enter) || JustPressed(Keys.Escape))
         {
-            PlayerInput.WritingText = true;
-            Main.instance.HandleIME();
-
-            var newText = Main.GetInputText(_searchUi.Text);
-
-            if (!newText.Equals(_searchUi.Text)) _searchUi.SetText(newText);
-
-            if (JustPressed(Keys.Enter) || JustPressed(Keys.Escape))
-            {
-                Main.drawingPlayerChat = false;
-
-                Unfocus();
-            }
+            Main.drawingPlayerChat = false;
+            SetFocus(false);
         }
+    }
+
+    // OnDeactivate is called whenever parent state is changed to null with UI.SetState call
+    public override void OnDeactivate()
+    {
+        SetFocus(false);
     }
 }

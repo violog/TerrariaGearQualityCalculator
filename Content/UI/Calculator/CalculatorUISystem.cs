@@ -3,33 +3,27 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
-using TerrariaGearQualityCalculator.Calculators;
 
 namespace TerrariaGearQualityCalculator.Content.UI.Calculator;
 
 public class CalculatorUISystem : ModSystem
 {
-    private GameTime _lastUpdateUiGameTime;
+    private UserInterface _calculatorInterface;
+    private CalculatorUI _calculatorUi;
 
-    internal UserInterface CalculatorInterface;
-
-    internal CalculatorUI CalculatorUi;
-    internal IModelStorage Storage = TerrariaGearQualityCalculator.Storage;
-
-    public override void Load()
+    public override void PostSetupContent()
     {
-        CalculatorInterface = new UserInterface();
-
-        CalculatorUi = new CalculatorUI();
-
-        CalculatorUi.Activate();
+        _calculatorInterface = new UserInterface();
+        _calculatorUi = new CalculatorUI();
+        _calculatorUi.Activate();
     }
 
     public override void UpdateUI(GameTime gameTime)
     {
-        _lastUpdateUiGameTime = gameTime;
-
-        if (CalculatorInterface?.CurrentState != null) CalculatorInterface.Update(gameTime);
+        if (_calculatorInterface?.CurrentState != null)
+        {
+            _calculatorInterface?.Update(gameTime);
+        }
     }
 
     public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
@@ -41,37 +35,27 @@ public class CalculatorUISystem : ModSystem
                 "TerrariaGearQualityCalculator: TerrariaGearQualityCalculatorInterface",
                 delegate
                 {
-                    if (_lastUpdateUiGameTime != null && CalculatorInterface?.CurrentState != null)
-                        CalculatorInterface.Draw(Main.spriteBatch, _lastUpdateUiGameTime);
+                    if (_calculatorInterface?.CurrentState != null)
+                        _calculatorInterface.Draw(Main.spriteBatch, new GameTime());
 
                     return true;
                 },
                 InterfaceScaleType.UI));
     }
 
-    public void ChangeDisplayUI(bool isOpen = false)
+    internal void ShowUI()
     {
-        if (isOpen)
-            HideUI();
-        else
-            ShowUI();
+        _calculatorInterface?.SetState(_calculatorUi);
     }
 
-    public void ShowUI()
+    internal void HideUI()
     {
-        CalculatorInterface?.SetState(CalculatorUi);
-    }
-
-    public void HideUI()
-    {
-        CalculatorInterface?.SetState(null);
+        _calculatorInterface?.SetState(null);
     }
 
     public override void Unload()
     {
-        Storage = null;
-        CalculatorInterface = null;
-        CalculatorUi = null;
-        _lastUpdateUiGameTime = null;
+        _calculatorInterface = null;
+        _calculatorUi = null;
     }
 }

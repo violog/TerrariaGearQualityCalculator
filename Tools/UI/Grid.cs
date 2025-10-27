@@ -5,7 +5,9 @@ namespace TerrariaGearQualityCalculator.Tools.UI;
 
 internal class Grid
 {
-    public static UIPanel CreateRow(float heightRow)
+    internal const float RowHeight = 30f;
+
+    public static UIPanel CreateRow(float heightRow = RowHeight)
     {
         var row = new UIPanel();
 

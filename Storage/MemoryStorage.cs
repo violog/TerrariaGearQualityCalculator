@@ -26,6 +26,7 @@ public class MemoryStorage
         if (!TGQC.IsSingleplayer) return 0;
 
         var i = _calculations.FindIndex(c => c.Id == boss.Id);
+        TGQC.Log.Info($"MemoryStorage: Updating boss id={boss.Id} at index={i}");
         if (i == -1) // returned when not found
             _calculations.Add(boss);
         else

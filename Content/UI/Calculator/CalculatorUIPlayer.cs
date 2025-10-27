@@ -1,19 +1,37 @@
-﻿using Terraria.GameInput;
+﻿using Microsoft.Xna.Framework.Input;
+using Terraria;
+using Terraria.GameInput;
 using Terraria.ModLoader;
+using TGQC = TerrariaGearQualityCalculator.TerrariaGearQualityCalculator;
 
 namespace TerrariaGearQualityCalculator.Content.UI.Calculator;
 
 public class CalculatorUIPlayer : ModPlayer
 {
-    public bool IsCalculatorOpen;
+    private bool _isOpen;
 
     public override void ProcessTriggers(TriggersSet triggersSet)
     {
-        if (TerrariaGearQualityCalculator.CalculatorHotKey.JustPressed)
-        {
-            ModContent.GetInstance<CalculatorUISystem>().ChangeDisplayUI(IsCalculatorOpen);
+        var system = ModContent.GetInstance<CalculatorUISystem>();
 
-            IsCalculatorOpen = !IsCalculatorOpen;
+        if (TGQC.CalculatorHotKey.JustPressed)
+        {
+            if (!_isOpen)
+            {
+                system.ShowUI();
+            }
+            else
+            {
+                system.HideUI();
+            }
+
+            _isOpen = !_isOpen;
+        }
+
+        if (Main.keyState.IsKeyDown(Keys.Escape))
+        {
+            system.HideUI();
+            _isOpen = false;
         }
     }
 }

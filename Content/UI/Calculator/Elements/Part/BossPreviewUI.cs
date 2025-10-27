@@ -1,42 +1,38 @@
 ﻿using Terraria.GameContent.UI.Elements;
+using TerrariaGearQualityCalculator.Tools.UI;
 
 namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements.Part;
 
 internal class BossPreviewUI : UIPanel
 {
-    private readonly string _bossData;
-    private readonly float _height;
+    private readonly string _name;
+    private readonly string _sr;
 
-    private readonly bool _isRight;
-
-    public BossPreviewUI(float height, string bossData, bool isRight)
+    public BossPreviewUI(string name, string sr, bool isRight)
     {
-        _height = height;
-        _bossData = bossData;
-        _isRight = isRight;
+        _name = name;
+        _sr = sr;
 
         Width.Set(0, 0.48f);
-        Height.Set(_height, 0f);
+        Height.Set(Grid.RowHeight, 0f);
         HAlign = 0f;
 
-        if (_isRight) HAlign = 0.95f;
+        if (isRight) HAlign = 0.95f;
 
         LoadElements();
     }
 
     private void LoadElements()
     {
-        var bossNameUi = new UIText(_bossData);
+        var name = new UIText(_name);
+        name.HAlign = 0f;
+        name.VAlign = 0.5f;
 
-        bossNameUi.HAlign = 0f;
-        bossNameUi.VAlign = 0.5f;
+        var sr = new UIText(_sr);
+        sr.HAlign = 1f;
+        sr.VAlign = 0.5f;
 
-        var bossValueUi = new UIText("0.199");
-
-        bossValueUi.HAlign = 1f;
-        bossValueUi.VAlign = 0.5f;
-
-        Append(bossNameUi);
-        Append(bossValueUi);
+        Append(name);
+        Append(sr);
     }
 }
