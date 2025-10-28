@@ -1,15 +1,21 @@
-using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using Terraria;
 using TerrariaGearQualityCalculator.Events;
-using TGQC = TerrariaGearQualityCalculator.TerrariaGearQualityCalculator;
 
 namespace TerrariaGearQualityCalculator.Calculators.Trivial;
 
-internal class TrivialCalculation(int id)
+internal class TrivialCalculation
     : ICalculation
 {
     private const double TicksPerSecond = 60;
+
+    [JsonConstructor]
+    public TrivialCalculation()
+    {
+    }
+
+    public TrivialCalculation(int id) => Id = id;
 
     internal TrivialCalculation(Player player, NPC boss, int fightTimeTicks, List<PlayerHitEvent> hits,
         List<Item> weapons) :
@@ -47,25 +53,17 @@ internal class TrivialCalculation(int id)
             PlayerTime = (double)player.statLifeMax / BossDps;
     }
 
-    public int PlayerDps { get; }
-    public int BossRemainingHp { get; }
-    public int BossDps { get; }
-    public PlayerGear Gear { get; } = new();
+    public int PlayerDps { get; set; }
+    public int BossRemainingHp { get; set; }
+    public int BossDps { get; set; }
+    public PlayerGear Gear { get; set; } = new();
 
-    public int Id { get; } = id;
-    public double PlayerTime { get; }
-    public double BossTime { get; }
+    public int Id { get; set; }
+    public double PlayerTime { get; set; }
+    public double BossTime { get; set; }
 
     public ICalculationModelWritable ToModel()
     {
-        try
-        {
-            return new CalculationModel(this);
-        }
-        catch (Exception e) when (e is InvalidOperationException or KeyNotFoundException)
-        {
-            TGQC.Log.Info($"NPC {Id} not found; the respective mod could have been unloaded; skipping.");
-            return null;
-        }
+        return CalculationModel.TryCreate(this);
     }
 }

@@ -88,12 +88,7 @@ internal class BossListUI : UIPanel
 
     private static List<ICalculationModel> FilterList(string search = null)
     {
-        TGQC.Log.Info(
-            $"Contains {TGQC.Storage.BossList.Count} bosses, search: {search}. Values:");
-        foreach (var boss in TGQC.Storage.BossList)
-        {
-            TGQC.Log.Debug(boss.ToString());
-        }
+        TGQC.Log.Debug($"Contains {TGQC.Storage.BossList.Count} bosses, search: {search}");
 
         if (!string.IsNullOrEmpty(search))
         {

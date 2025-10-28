@@ -56,20 +56,19 @@ internal class PlayerAssist : ModPlayer
             return;
 
         var npcId = Tracker.NpcId;
-        try
+        var boss = Main.npc.FirstOrDefault(n => n.netID == npcId && n.boss);
+        // Possible workaround: track last known boss health on every hit (fix only when it actually happens)
+        // This will require either introducing new MockNPC class, or adding a couple of constructors with raw values.
+        // One more option is to track the boss entry itself, so it won't be garbage-collected.
+        // Due to Nycro's NoHit interference issue, the best option would be to track boss health separately.
+        if (boss == null)
         {
-            var boss = Main.npc.First(n => n.netID == npcId && n.boss);
-            _storage.Save(Tracker.CalcTrivial(boss));
-            TGQC.Log.Debug($"Stored tracker of NPC id={Tracker.NpcId}: fightTicks={Tracker.FightTicks}");
-            Tracker = new Tracker();
-        }
-        catch (Exception e) when (e is InvalidOperationException or KeyNotFoundException)
-        {
-            // Possible workaround: track last known boss health on every hit (fix only when it actually happens)
-            // This will require either introducing new MockNPC class, or adding a couple of constructors with raw values.
-            // One more option is to track the boss entry itself, so it won't be garbage-collected.
-            // Due to Nycro's NoHit interference issue, the best option would be to track boss health separately.
             TGQC.Log.Error($"NPC id={npcId} has despawned, was not found or is not a boss");
+            return;
         }
+
+        _storage.Save(Tracker.CalcTrivial(boss));
+        TGQC.Log.Debug($"Stored tracker of NPC id={Tracker.NpcId}: fightTicks={Tracker.FightTicks}");
+        Tracker = new Tracker();
     }
 }

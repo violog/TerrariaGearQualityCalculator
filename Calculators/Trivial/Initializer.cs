@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Terraria.ID;
+using TGQC = TerrariaGearQualityCalculator.TerrariaGearQualityCalculator;
 
 namespace TerrariaGearQualityCalculator.Calculators.Trivial;
 
@@ -19,6 +20,7 @@ internal static class Initializer
             result.Add(calc);
         }
 
+        TGQC.Log.Info($"Initialized list with {result.Count} bosses.");
         return result;
     }
 }

@@ -1,8 +1,10 @@
 using System.Globalization;
 using System.Linq;
+using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using TGQC = TerrariaGearQualityCalculator.TerrariaGearQualityCalculator;
 
 namespace TerrariaGearQualityCalculator.Calculators.Trivial;
 
@@ -28,17 +30,26 @@ internal class CalculationModel : ICalculationModelWritable
         ];
     }
 
-    // CalculationModel throws InvalidOperationException when NPC with such ID is not found: ensure to catch it
-    public CalculationModel(TrivialCalculation calculation)
+    internal static CalculationModel TryCreate(TrivialCalculation calculation)
     {
-        var npc = ContentSamples.NpcsByNetId[calculation.Id];
-        if (npc == null)
+        var ok = ContentSamples.NpcsByNetId.TryGetValue(calculation.Id, out var npc);
+        if (ok) return new CalculationModel(calculation, npc);
+
+        var modNpc = ModContent.GetContent<ModNPC>().FirstOrDefault(n => n.NPC.netID == calculation.Id);
+        if (modNpc == null)
         {
-            var modNpc = ModContent.GetContent<ModNPC>()
-                .First(n => n.NPC.netID == calculation.Id);
-            npc = modNpc.NPC;
+            TGQC.Log.Warn(
+                $"NPC {calculation.Id} not found; the respective mod could have been unloaded; skipping.");
+            return null;
         }
 
+        npc = modNpc.NPC;
+
+        return new CalculationModel(calculation, npc);
+    }
+
+    private CalculationModel(TrivialCalculation calculation, NPC npc)
+    {
         _id = calculation.Id;
         Name = npc.FullName;
         Update(calculation);
@@ -71,6 +82,8 @@ internal class CalculationModel : ICalculationModelWritable
             string.Join(", ", calc.Gear.Accessories)
         ];
     }
+
+    internal bool IsDefault() => _id == 0 && Name == "";
 
     // ToString is used for debugging and may be not updated with latest changes
     public override string ToString()
