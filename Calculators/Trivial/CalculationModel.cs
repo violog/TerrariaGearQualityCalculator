@@ -83,8 +83,6 @@ internal class CalculationModel : ICalculationModelWritable
         ];
     }
 
-    internal bool IsDefault() => _id == 0 && Name == "";
-
     // ToString is used for debugging and may be not updated with latest changes
     public override string ToString()
     {

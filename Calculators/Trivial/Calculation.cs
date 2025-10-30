@@ -5,6 +5,7 @@ using TerrariaGearQualityCalculator.Events;
 
 namespace TerrariaGearQualityCalculator.Calculators.Trivial;
 
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 internal class TrivialCalculation
     : ICalculation
 {
@@ -40,17 +41,16 @@ internal class TrivialCalculation
             prev = hit;
         }
 
-        BossDps = (int)dps;
+        BossDps = (int)dps / hits.Count;
 
         if (player.statLife == 0)
+        {
             PlayerTime = fightTimeSec;
-        else
-            // This is the right measurement, because all life regen and health potions
-            // have been taken into account while counting BossDps.
-            // This should be tested and improved, e.g. for the case when player uses big
-            // health potion and kills the boss too quickly, not counting health potion cooldown
-            // if the fight would proceed further.
-            PlayerTime = (double)player.statLifeMax / BossDps;
+            return;
+        }
+
+        double dmgReceived = player.statLifeMax - player.statLife;
+        PlayerTime = player.statLifeMax / dmgReceived * fightTimeSec;
     }
 
     public int PlayerDps { get; set; }
