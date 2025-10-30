@@ -1,56 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Terraria.GameContent.UI.Elements;
-using Terraria.ModLoader;
+﻿using Terraria.GameContent.UI.Elements;
+using TerrariaGearQualityCalculator.Tools.UI;
 
-namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements.Part
+namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements.Part;
+
+internal class BossPreviewUI : UIPanel
 {
-    internal class BossPreviewUI : UIPanel
+    private readonly string _name;
+    private readonly string _sr;
+
+    public BossPreviewUI(string name, string sr, bool isRight)
     {
-        private float _height;
+        _name = name;
+        _sr = sr;
 
-        private string _bossData;
+        Width.Set(0, 0.48f);
+        Height.Set(Grid.RowHeight, 0f);
+        HAlign = 0f;
 
-        private bool _isRight = false;
+        if (isRight) HAlign = 0.95f;
 
-        public BossPreviewUI(float height, string bossData, bool isRight)
-        {
-            _height = height;
-            _bossData = bossData;
-            _isRight = isRight;
-        }
+        LoadElements();
+    }
 
-        public override void OnInitialize()
-        {
-            Width.Set(0, 0.48f);
-            Height.Set(_height, 0f);
-            HAlign = 0f;
+    private void LoadElements()
+    {
+        var name = new UIText(_name);
+        name.HAlign = 0f;
+        name.VAlign = 0.5f;
 
-            if (_isRight)
-            {
-                HAlign = 0.95f;
-            }
+        var sr = new UIText(_sr);
+        sr.HAlign = 1f;
+        sr.VAlign = 0.5f;
 
-            LoadElements();
-        }
-
-        private void LoadElements()
-        {
-            UIText bossNameUi = new UIText(_bossData, 1f);
-
-            bossNameUi.HAlign = 0f;
-            bossNameUi.VAlign = 0.5f;
-
-            UIText bossValueUi = new UIText("0.199", 1f);
-
-            bossValueUi.HAlign = 1f;
-            bossValueUi.VAlign = 0.5f;
-
-            Append(bossNameUi);
-            Append(bossValueUi);
-        }
+        Append(name);
+        Append(sr);
     }
 }

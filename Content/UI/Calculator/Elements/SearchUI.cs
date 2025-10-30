@@ -1,119 +1,108 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.GameInput;
-using Terraria.Localization;
 using Terraria.UI;
+using TGQC = TerrariaGearQualityCalculator.TerrariaGearQualityCalculator;
 
-namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements
+namespace TerrariaGearQualityCalculator.Content.UI.Calculator.Elements;
+
+internal class SearchUI : UIElement
 {
-    internal class SearchUI : UIElement
+    private bool _isFocused;
+    private UITextBox _searchUi;
+    private string _oldText = "";
+
+    internal string Text => _searchUi == null || _searchUi.Text == Placeholder ? "" : _searchUi.Text;
+
+    private string Placeholder = "Search...";
+
+    public override void OnInitialize()
     {
-        private UITextBox _searchUi;
-
-        private bool _isFocused = false;
-
-        private string _placeholder = "Search...";
-
-        public string Text => _searchUi.Text;
-
-        public string Placeholder => _placeholder;
-
-        public override void OnInitialize()
+        _searchUi = new UITextBox(Placeholder)
         {
-            _searchUi = new UITextBox(_placeholder, 1f, false)
-            {
-                Width = StyleDimension.Fill,
-                Height = StyleDimension.Fill,
-                TextHAlign = 0f
-            };
+            Width = StyleDimension.Fill,
+            Height = StyleDimension.Fill,
+            TextHAlign = 0f,
+        };
 
-            _searchUi.SetTextMaxLength(50);
+        _searchUi.SetTextMaxLength(50);
+        _searchUi.OnLeftClick += (_, _) => { SetFocus(true); };
+        Append(_searchUi);
+        SetFocus(false);
+    }
 
-            _searchUi.OnLeftClick += (evt, element) =>
-            {
-                if (_searchUi.Text == _placeholder)
-                {
-                    _searchUi.SetText("");
-                }
+    public bool NeedSearch()
+    {
+        return _searchUi.Text != Placeholder && _isFocused && !_oldText.Equals(_searchUi.Text);
+    }
 
-                Focus();
-            };
+    public void ResetSearch()
+    {
+        _oldText = _searchUi.Text;
+    }
 
-            Append(_searchUi);
+    private void SetFocus(bool v)
+    {
+        if (v)
+        {
+            Main.clrInput();
+            _searchUi.SetText("");
+            _searchUi.TextColor = Color.White;
+        }
+        else
+        {
+            if (Text == "") _searchUi.SetText(Placeholder);
+            _searchUi.TextColor = Color.Gray;
         }
 
-        public void Focus()
+        _isFocused = v;
+        _searchUi.ShowInputTicker = v;
+        Main.blockInput = v;
+    }
+
+    private static bool JustPressed(Keys key)
+    {
+        return Main.inputText.IsKeyDown(key) && !Main.oldInputText.IsKeyDown(key);
+    }
+
+    public override void Update(GameTime gameTime)
+    {
+        var MousePosition = new Vector2(Main.mouseX, Main.mouseY);
+
+        if (!ContainsPoint(MousePosition) && (Main.mouseLeft || Main.mouseRight))
         {
-            if (!_isFocused)
-            {
-                Main.clrInput();
-                _isFocused = true;
-                Main.blockInput = true;
-            }
+            SetFocus(false);
         }
 
-        public void Unfocus()
+        base.Update(gameTime);
+    }
+
+    protected override void DrawSelf(SpriteBatch spriteBatch)
+    {
+        base.DrawSelf(spriteBatch);
+
+        if (!_isFocused) return;
+
+        // must run every tick, just like DrawSelf does
+        PlayerInput.WritingText = true;
+        Main.instance.HandleIME();
+        var newText = Main.GetInputText(_searchUi.Text);
+
+        if (!newText.Equals(_searchUi.Text)) _searchUi.SetText(newText);
+
+        if (JustPressed(Keys.Enter) || JustPressed(Keys.Escape))
         {
-            if (_isFocused)
-            {
-                _isFocused = false;
-                Main.blockInput = false;
-            }
+            Main.drawingPlayerChat = false;
+            SetFocus(false);
         }
+    }
 
-        private static bool JustPressed(Keys key)
-        {
-            return Main.inputText.IsKeyDown(key) && !Main.oldInputText.IsKeyDown(key);
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-            Vector2 MousePosition = new Vector2((float)Main.mouseX, (float)Main.mouseY);
-
-            if (!ContainsPoint(MousePosition) && (Main.mouseLeft || Main.mouseRight))
-            {
-                if (string.IsNullOrEmpty(_searchUi.Text))
-                {
-                    _searchUi.SetText(_placeholder);
-                }
-
-                Unfocus();
-            }
-
-            base.Update(gameTime);
-        }
-
-        protected override void DrawSelf(SpriteBatch spriteBatch)
-        {
-            base.DrawSelf(spriteBatch);
-
-            if (_isFocused)
-            {
-                PlayerInput.WritingText = true;
-                Main.instance.HandleIME();
-
-                string newText = Main.GetInputText(_searchUi.Text);
-
-                if (!newText.Equals(_searchUi.Text))
-                {
-                    _searchUi.SetText(newText);
-                }
-
-                if (JustPressed(Keys.Enter) || JustPressed(Keys.Escape))
-                {
-                    Main.drawingPlayerChat = false;
-
-                    Unfocus();
-                }
-            }
-        }
+    // OnDeactivate is called whenever parent state is changed to null with UI.SetState call
+    public override void OnDeactivate()
+    {
+        SetFocus(false);
     }
 }

@@ -1,8 +1,10 @@
 using System.Globalization;
 using System.Linq;
+using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using TGQC = TerrariaGearQualityCalculator.TerrariaGearQualityCalculator;
 
 namespace TerrariaGearQualityCalculator.Calculators.Trivial;
 
@@ -28,25 +30,36 @@ internal class CalculationModel : ICalculationModelWritable
         ];
     }
 
-    // CalculationModel throws InvalidOperationException when NPC with such ID is not found: ensure to catch it
-    public CalculationModel(TrivialCalculation calculation)
+    internal static CalculationModel TryCreate(TrivialCalculation calculation)
     {
-        var npc = ContentSamples.NpcsByNetId[calculation.Id];
-        if (npc == null)
+        var ok = ContentSamples.NpcsByNetId.TryGetValue(calculation.Id, out var npc);
+        if (ok) return new CalculationModel(calculation, npc);
+
+        var modNpc = ModContent.GetContent<ModNPC>().FirstOrDefault(n => n.NPC.netID == calculation.Id);
+        if (modNpc == null)
         {
-            var modNpc = ModContent.GetContent<ModNPC>()
-                .First(n => n.NPC.netID == calculation.Id);
-            npc = modNpc.NPC;
+            TGQC.Log.Warn(
+                $"NPC {calculation.Id} not found; the respective mod could have been unloaded; skipping.");
+            return null;
         }
 
+        npc = modNpc.NPC;
+
+        return new CalculationModel(calculation, npc);
+    }
+
+    private CalculationModel(TrivialCalculation calculation, NPC npc)
+    {
+        _id = calculation.Id;
         Name = npc.FullName;
         Update(calculation);
     }
 
     private static LocalizedText[] StaticDetailsAttributes { get; }
+    private readonly int _id;
 
     public string Name { get; }
-    public double Sr { get; private set; }
+    public string Sr { get; private set; }
 
     public LocalizedText[] DetailsAttributes => StaticDetailsAttributes;
 
@@ -54,11 +67,11 @@ internal class CalculationModel : ICalculationModelWritable
 
     public void Update(ICalculation calculation)
     {
-        Sr = calculation.Sr;
+        Sr = FormatFixed(calculation.Sr, 3);
         var calc = (TrivialCalculation)calculation;
         DetailsValues =
         [
-            FormatFixed(Sr, 3),
+            Sr,
             FormatFixed(calc.PlayerTime, 3),
             FormatFixed(calc.BossTime, 3),
             FormatFixed(calc.PlayerDps),
@@ -74,7 +87,7 @@ internal class CalculationModel : ICalculationModelWritable
     public override string ToString()
     {
         var details = string.Join(", ", DetailsAttributes.Zip(DetailsValues, (attr, value) => $"{attr}: {value}"));
-        return $"Name=${Name} DetailsValues={details}";
+        return $"Id={_id} Name={Name} Details={details}";
     }
 
     private static string FormatFixed(double value, int digits = 0)

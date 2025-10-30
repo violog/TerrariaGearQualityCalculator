@@ -10,7 +10,7 @@ public interface ICalculationModel
     public string Name { get; }
 
     // Sr is Survivability Ratio that must be up-to-date with the original ICalculation.Sr
-    public double Sr { get; }
+    public string Sr { get; }
 
     // DetailsAttributes are the public properties of every calculation, like SR, DPS, boss and player time etc.
     public LocalizedText[] DetailsAttributes { get; }

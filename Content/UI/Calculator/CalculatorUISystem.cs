@@ -1,91 +1,61 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
-using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
-using TerrariaGearQualityCalculator.Calculators;
 
-namespace TerrariaGearQualityCalculator.Content.UI.Calculator
+namespace TerrariaGearQualityCalculator.Content.UI.Calculator;
+
+public class CalculatorUISystem : ModSystem
 {
-    public class CalculatorUISystem : ModSystem
+    private UserInterface _calculatorInterface;
+    private CalculatorUI _calculatorUi;
+
+    public override void PostSetupContent()
     {
-        internal IModelStorage Storage = TerrariaGearQualityCalculator.Storage;
+        _calculatorInterface = new UserInterface();
+        _calculatorUi = new CalculatorUI();
+        _calculatorUi.Activate();
+    }
 
-        internal UserInterface CalculatorInterface;
-
-        internal CalculatorUI CalculatorUi;
-
-        private GameTime _lastUpdateUiGameTime;
-
-        public override void Load()
+    public override void UpdateUI(GameTime gameTime)
+    {
+        if (_calculatorInterface?.CurrentState != null)
         {
-            CalculatorInterface = new UserInterface();
-
-            CalculatorUi = new CalculatorUI();
-
-            CalculatorUi.Activate();
+            _calculatorInterface?.Update(gameTime);
         }
+    }
 
-        public override void UpdateUI(GameTime gameTime)
-        {
-            _lastUpdateUiGameTime = gameTime;
+    public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
+    {
+        var mouseTextIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Mouse Text"));
 
-            if (CalculatorInterface?.CurrentState != null)
-            {
-                CalculatorInterface.Update(gameTime);
-            }
-        }
+        if (mouseTextIndex != -1)
+            layers.Insert(mouseTextIndex, new LegacyGameInterfaceLayer(
+                "TerrariaGearQualityCalculator: TerrariaGearQualityCalculatorInterface",
+                delegate
+                {
+                    if (_calculatorInterface?.CurrentState != null)
+                        _calculatorInterface.Draw(Main.spriteBatch, new GameTime());
 
-        public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
-        {
-            int mouseTextIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Mouse Text"));
+                    return true;
+                },
+                InterfaceScaleType.UI));
+    }
 
-            if (mouseTextIndex != -1)
-            {
-                layers.Insert(mouseTextIndex, new LegacyGameInterfaceLayer(
-                    "TerrariaGearQualityCalculator: TerrariaGearQualityCalculatorInterface",
-                    delegate
-                    {
-                        if (_lastUpdateUiGameTime != null && CalculatorInterface?.CurrentState != null)
-                        {
-                            CalculatorInterface.Draw(Main.spriteBatch, _lastUpdateUiGameTime);
-                        }
+    internal void ShowUI()
+    {
+        _calculatorInterface?.SetState(_calculatorUi);
+    }
 
-                        return true;
-                    },
-                    InterfaceScaleType.UI));
-            }
-        }
+    internal void HideUI()
+    {
+        _calculatorInterface?.SetState(null);
+    }
 
-        public void ChangeDisplayUI(bool isOpen = false)
-        {
-            if (isOpen)
-            {
-                HideUI();
-            }
-            else
-            {
-                ShowUI();
-            }
-        }
-
-        public void ShowUI()
-        {
-            CalculatorInterface?.SetState(CalculatorUi);
-        }
-
-        public void HideUI()
-        {
-            CalculatorInterface?.SetState(null);
-        }
-
-        public override void Unload()
-        {
-            Storage = null;
-            CalculatorInterface = null;
-            CalculatorUi = null;
-            _lastUpdateUiGameTime = null;
-        }
+    public override void Unload()
+    {
+        _calculatorInterface = null;
+        _calculatorUi = null;
     }
 }
